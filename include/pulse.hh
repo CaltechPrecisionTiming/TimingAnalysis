@@ -39,6 +39,16 @@ public :
    Float_t         LP2_10[36];
    Float_t         LP2_30[36];
    UShort_t        tc[4];
+   Float_t         xIntercept;
+   Float_t         yIntercept;
+   Float_t         xSlope;
+   Float_t         ySlope;
+   Float_t         x1;
+   Float_t         y1;
+   Float_t         x2;
+   Float_t         y2;
+   Float_t         chi2;
+   Int_t           ntracks;
 
   float mpv[36];
 
@@ -60,6 +70,16 @@ public :
    TBranch        *b_LP2_10;   //!
    TBranch        *b_LP2_30;   //!
    TBranch        *b_tc;   //!
+   TBranch        *b_xIntercept;   //!
+   TBranch        *b_yIntercept;   //!
+   TBranch        *b_xSlope;   //!
+   TBranch        *b_ySlope;   //!
+   TBranch        *b_x1;   //!
+   TBranch        *b_y1;   //!
+   TBranch        *b_x2;   //!
+   TBranch        *b_y2;   //!
+   TBranch        *b_chi2;   //!
+   TBranch        *b_ntracks;   //!
 
 
    pulse(TTree *tree=0);
@@ -74,6 +94,40 @@ public :
   void              GetAmp( int ch = -1 );
   void              GetAmps( );
   void              GetDeltaT( );   
+  //Loop, Fits, and Computations are done in these functions; They are used by the end USER Methods
+  virtual std::pair<float,float> MPV_vs_Position( int dut = -1, TString coor = "X", const int channel = -1,
+						  const float coorLow = 0, const float step = 25.,
+						  const float AmpLowCut = 0, const float AmpHighCut = 0.0,
+						  float other_corr_low = 0, float other_corr_high = 99999,
+						  float photek_low = 0.1, float photek_high = 0.3);
+
+  virtual std::pair<float,float> MPV_vs_Position_ROOFIT( int dut = -1, TString coor = "X", const int channel = -1,
+						  const float coorLow = 0, const float step = 25.,
+						  const float AmpLowCut = 0, const float AmpHighCut = 0.0,
+						  float other_corr_low = 0, float other_corr_high = 99999,
+						  float photek_low = 0.1, float photek_high = 0.3);
+  
+  
+  virtual std::pair<float,float> DeltaT_vs_Position( int dut = -1, TString coor = "X", const int channel = -1, 
+						     const int timestampOption = 0,
+						     const float coorLow = 0, const float step = 25.,
+						     const float AmpLowCut = 0, const float AmpHighCut = 0.0,
+						     float other_corr_low = 0, float other_corr_high = 99999, bool _isMean = true,
+						     float photek_low = 0.1, float photek_high = 0.3);
+
+  //This Methods are recommended to be used for by end USER
+  virtual void CreateMPV_vs_PositionHisto(  int dut, int channelNumber, float binWidth, float threshold_low, float threshold_high,
+					    float xmin, float xmax, float ymin, float ymax,
+					    float photek_low = 0.1, float photek_high = 0.3);
+  virtual void CreateDeltaT_vs_PositionHisto(  int dut, int channelNumber, int timestampOption,
+					       float binWidth, float threshold_low, float threshold_high,
+					       float xmin, float xmax, float ymin, float ymax, 
+					       float deltaTMin, float deltaTMax,
+					       bool _isMean = true,
+					       float photek_low = 0.1, float photek_high = 0.3);
+  void MakeEfficiencyVsXY(int channelNumber, int nbins, float threshold, float xmin, float xmax, float ymin, float ymax,
+			  float photek_low = 0.1, float photek_high = 0.3);
+
 };
 
 #endif
@@ -152,6 +206,16 @@ void pulse::Init(TTree *tree)
    fChain->SetBranchAddress("LP2_10", LP2_10, &b_LP2_10);
    fChain->SetBranchAddress("LP2_30", LP2_30, &b_LP2_30);
    fChain->SetBranchAddress("tc", tc, &b_tc);
+   fChain->SetBranchAddress("xIntercept", &xIntercept, &b_xIntercept);
+   fChain->SetBranchAddress("yIntercept", &yIntercept, &b_yIntercept);
+   fChain->SetBranchAddress("xSlope", &xSlope, &b_xSlope);
+   fChain->SetBranchAddress("ySlope", &ySlope, &b_ySlope);
+   fChain->SetBranchAddress("x1", &x1, &b_x1);
+   fChain->SetBranchAddress("y1", &y1, &b_y1);
+   fChain->SetBranchAddress("x2", &x2, &b_x2);
+   fChain->SetBranchAddress("y2", &y2, &b_y2);
+   fChain->SetBranchAddress("chi2", &chi2, &b_chi2);
+   fChain->SetBranchAddress("ntracks", &ntracks, &b_ntracks);
    Notify();
 }
 
