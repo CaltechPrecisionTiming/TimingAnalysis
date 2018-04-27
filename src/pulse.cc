@@ -235,8 +235,8 @@ void pulse::MakeEfficiencyVsXY(int channelNumber, int nbins, float threshold, fl
   //Activate Only Necessary Branches
   fChain->SetBranchStatus("*", 0);
   fChain->SetBranchStatus("amp", 1);
-  fChain->SetBranchStatus("x1", 1);
-  fChain->SetBranchStatus("y1", 1);
+  fChain->SetBranchStatus("x_dut[0]", 1);
+  fChain->SetBranchStatus("y_dut[0]", 1);
   fChain->SetBranchStatus("ntracks", 1);
   fChain->SetBranchStatus("chi2", 1);
   fChain->SetBranchStatus("xSlope", 1);
@@ -262,24 +262,24 @@ void pulse::MakeEfficiencyVsXY(int channelNumber, int nbins, float threshold, fl
       
       // if ( !(fabs(xSlope) < 5e-4 && fabs(ySlope) < 5e-4)) continue;
       //if ( !(fabs(xSlope) < 1e-3 && (fabs(ySlope) < 4e-3) && fabs(ySlope) > 3e-3)) continue;
-      if ( !(fabs(xSlope + 1.12687e-04) < 5e-4 && fabs(ySlope + 3.546e-3) < 5e-4)) continue; //For CNM W9HG11 Run 838-839-841
-      if ( !(amp[channelNumber] < 0.45 )) continue;//No saturation
+      //if ( !(fabs(xSlope + 1.12687e-04) < 5e-4 && fabs(ySlope + 3.546e-3) < 5e-4)) continue; //For CNM W9HG11 Run 838-839-841
+      if ( !(amp[channelNumber] < 450 )) continue;//No saturation
 
 
       //For irradiated 50D sensor on UCSC board (ch1), require that the particle is within the sensor circular region
-      //if (!(sqrt(pow(x1 - 13930,2) + pow(y1 - 21830 ,2)) < 400)) continue;
+      //if (!(sqrt(pow(x_dut[0] - 13930,2) + pow(y_dut[0] - 21830 ,2)) < 400)) continue;
 
-      if ( y1 > ymin && y1 < ymax ) {
-	histX_den->Fill( 0.001*x1);
+      if ( y_dut[2] > ymin && y_dut[2] < ymax ) {
+	histX_den->Fill( x_dut[2]);
 	if ( amp[channelNumber] > threshold ) {
-	    histX_num->Fill( 0.001*x1 );
+	    histX_num->Fill( x_dut[0] );
 	}
       }
       
-      if ( x1 > xmin && x1 < xmax ) {
-	histY_den->Fill( 0.001*y1 );
+      if ( x_dut[2] > xmin && x_dut[2] < xmax ) {
+	histY_den->Fill(y_dut[2] );
 	if ( amp[channelNumber] > threshold ) {
-	  histY_num->Fill( 0.001*y1 );       
+	  histY_num->Fill( y_dut[2] );       
 	} 
       }
     
@@ -768,10 +768,10 @@ std::pair<float,float> pulse::MPV_vs_Position( int dut, TString coor, const int 
   
   fChain->SetBranchStatus("*", 0);
   fChain->SetBranchStatus("amp", 1);
-  fChain->SetBranchStatus("x1", 1);
-  fChain->SetBranchStatus("y1", 1);
-  fChain->SetBranchStatus("x2", 1);
-  fChain->SetBranchStatus("y2", 1);
+  fChain->SetBranchStatus("x_dut[0]", 1);
+  fChain->SetBranchStatus("y_dut[0]", 1);
+  fChain->SetBranchStatus("x_dut[1]", 1);
+  fChain->SetBranchStatus("y_dut[1]", 1);
   if (fChain == 0) return std::pair<float,float>(-999,0);
   Long64_t nentries = fChain->GetEntriesFast();
   Long64_t nbytes = 0, nb = 0;
@@ -790,13 +790,13 @@ std::pair<float,float> pulse::MPV_vs_Position( int dut, TString coor, const int 
 	{
 	  if ( dut == 1 )
 	    {
-	      if ( (coor == "x" || coor == "X") && x1 >= coorLow && x1 < (coorLow + step) && y1 > other_corr_low && y1 < other_corr_high ) h_mpv->Fill(amp[channel]);
-	      if ( (coor == "y" || coor == "Y") && y1 >= coorLow && y1 < (coorLow + step) && x1 > other_corr_low && x1 < other_corr_high ) h_mpv->Fill(amp[channel]);
+	      if ( (coor == "x" || coor == "X") && x_dut[0] >= coorLow && x_dut[0] < (coorLow + step) && y_dut[0] > other_corr_low && y_dut[0] < other_corr_high ) h_mpv->Fill(amp[channel]);
+	      if ( (coor == "y" || coor == "Y") && y_dut[0] >= coorLow && y_dut[0] < (coorLow + step) && x_dut[0] > other_corr_low && x_dut[0] < other_corr_high ) h_mpv->Fill(amp[channel]);
 	    }
 	  else if ( dut == 2 )
 	    {
-	      if ( (coor == "x" || coor == "X") && x2 >= coorLow && x2 < (coorLow + step) && y2 > other_corr_low && y2 < other_corr_high ) h_mpv->Fill(amp[channel]);
-	      if ( (coor == "y" || coor == "Y") && y2 >= coorLow && y2 < (coorLow + step) && x2 > other_corr_low && x2 < other_corr_high ) h_mpv->Fill(amp[channel]);
+	      if ( (coor == "x" || coor == "X") && x_dut[1] >= coorLow && x_dut[1] < (coorLow + step) && y_dut[1] > other_corr_low && y_dut[1] < other_corr_high ) h_mpv->Fill(amp[channel]);
+	      if ( (coor == "y" || coor == "Y") && y_dut[1] >= coorLow && y_dut[1] < (coorLow + step) && x_dut[1] > other_corr_low && x_dut[1] < other_corr_high ) h_mpv->Fill(amp[channel]);
 	    }
 	}
     }
@@ -882,10 +882,10 @@ std::pair<float,float> pulse::MPV_vs_Position_ROOFIT( int dut, TString coor, con
   
   fChain->SetBranchStatus("*", 0);
   fChain->SetBranchStatus("amp", 1);
-  fChain->SetBranchStatus("x1", 1);
-  fChain->SetBranchStatus("y1", 1);
-  fChain->SetBranchStatus("x2", 1);
-  fChain->SetBranchStatus("y2", 1);
+  fChain->SetBranchStatus("x_dut[0]", 1);
+  fChain->SetBranchStatus("y_dut[0]", 1);
+  fChain->SetBranchStatus("x_dut[1]", 1);
+  fChain->SetBranchStatus("y_dut[1]", 1);
   if (fChain == 0) return std::pair<float,float>(-999,0);
   Long64_t nentries = fChain->GetEntriesFast();
   Long64_t nbytes = 0, nb = 0;
@@ -904,13 +904,13 @@ std::pair<float,float> pulse::MPV_vs_Position_ROOFIT( int dut, TString coor, con
 	{
 	  if ( dut == 1 )
 	    {
-	      if ( (coor == "x" || coor == "X") && x1 >= coorLow && x1 < (coorLow + step) && y1 > other_corr_low && y1 < other_corr_high )
+	      if ( (coor == "x" || coor == "X") && x_dut[0] >= coorLow && x_dut[0] < (coorLow + step) && y_dut[0] > other_corr_low && y_dut[0] < other_corr_high )
 		{
 		  h_mpv->Fill(amp[channel]);
 		  Amp.setVal( amp[channel] );
 		  data.add(RooArgSet(Amp));
 		}
-	      if ( (coor == "y" || coor == "Y") && y1 >= coorLow && y1 < (coorLow + step) && x1 > other_corr_low && x1 < other_corr_high )
+	      if ( (coor == "y" || coor == "Y") && y_dut[0] >= coorLow && y_dut[0] < (coorLow + step) && x_dut[0] > other_corr_low && x_dut[0] < other_corr_high )
 		{
 		  h_mpv->Fill(amp[channel]);
 		  Amp.setVal( amp[channel] );
@@ -919,13 +919,13 @@ std::pair<float,float> pulse::MPV_vs_Position_ROOFIT( int dut, TString coor, con
 	    }
 	  else if ( dut == 2 )
 	    {
-	      if ( (coor == "x" || coor == "X") && x2 >= coorLow && x2 < (coorLow + step) && y2 > other_corr_low && y2 < other_corr_high )
+	      if ( (coor == "x" || coor == "X") && x_dut[1] >= coorLow && x_dut[1] < (coorLow + step) && y_dut[1] > other_corr_low && y_dut[1] < other_corr_high )
 		{
 		  h_mpv->Fill(amp[channel]);
 		  Amp.setVal( amp[channel] );
 		  data.add(RooArgSet(Amp));
 		}
-	      if ( (coor == "y" || coor == "Y") && y2 >= coorLow && y2 < (coorLow + step) && x2 > other_corr_low && x2 < other_corr_high )
+	      if ( (coor == "y" || coor == "Y") && y_dut[1] >= coorLow && y_dut[1] < (coorLow + step) && x_dut[1] > other_corr_low && x_dut[1] < other_corr_high )
 		{
 		  h_mpv->Fill(amp[channel]);
 		  Amp.setVal( amp[channel] );
@@ -1043,10 +1043,10 @@ std::pair<float,float> pulse::DeltaT_vs_Position( int dut, TString coor, const i
   fChain->SetBranchStatus("linearTime30", 1);
   fChain->SetBranchStatus("LP2_30", 1);
   fChain->SetBranchStatus("linearTime60", 1);
-  fChain->SetBranchStatus("x1", 1);
-  fChain->SetBranchStatus("y1", 1);
-  fChain->SetBranchStatus("x2", 1);
-  fChain->SetBranchStatus("y2", 1);
+  fChain->SetBranchStatus("x_dut[0]", 1);
+  fChain->SetBranchStatus("y_dut[0]", 1);
+  fChain->SetBranchStatus("x_dut[1]", 1);
+  fChain->SetBranchStatus("y_dut[1]", 1);
   if (fChain == 0) return std::pair<float,float>(-999,0);
   Long64_t nentries = fChain->GetEntriesFast();
   Long64_t nbytes = 0, nb = 0;
@@ -1072,13 +1072,13 @@ std::pair<float,float> pulse::DeltaT_vs_Position( int dut, TString coor, const i
 	{
 	  if ( dut == 1 )
 	    {
-	      if ( (coor == "x" || coor == "X") && x1 >= coorLow && x1 < (coorLow + step) && y1 > other_corr_low && y1 < other_corr_high ) h_deltaT->Fill(timestamp-timeReference);
-	      if ( (coor == "y" || coor == "Y") && y1 >= coorLow && y1 < (coorLow + step) && x1 > other_corr_low && x1 < other_corr_high ) h_deltaT->Fill(timestamp-timeReference);
+	      if ( (coor == "x" || coor == "X") && x_dut[0] >= coorLow && x_dut[0] < (coorLow + step) && y_dut[0] > other_corr_low && y_dut[0] < other_corr_high ) h_deltaT->Fill(timestamp-timeReference);
+	      if ( (coor == "y" || coor == "Y") && y_dut[0] >= coorLow && y_dut[0] < (coorLow + step) && x_dut[0] > other_corr_low && x_dut[0] < other_corr_high ) h_deltaT->Fill(timestamp-timeReference);
 	    }
 	  else if ( dut == 2 )
 	    {
-	      if ( (coor == "x" || coor == "X") && x2 >= coorLow && x2 < (coorLow + step) && y2 > other_corr_low && y2 < other_corr_high ) h_deltaT->Fill(timestamp-timeReference);
-	      if ( (coor == "y" || coor == "Y") && y2 >= coorLow && y2 < (coorLow + step) && x2 > other_corr_low && x2 < other_corr_high ) h_deltaT->Fill(timestamp-timeReference);
+	      if ( (coor == "x" || coor == "X") && x_dut[1] >= coorLow && x_dut[1] < (coorLow + step) && y_dut[1] > other_corr_low && y_dut[1] < other_corr_high ) h_deltaT->Fill(timestamp-timeReference);
+	      if ( (coor == "y" || coor == "Y") && y_dut[1] >= coorLow && y_dut[1] < (coorLow + step) && x_dut[1] > other_corr_low && x_dut[1] < other_corr_high ) h_deltaT->Fill(timestamp-timeReference);
 	    }
 	}
     }

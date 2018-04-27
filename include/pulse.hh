@@ -43,10 +43,8 @@ public :
    Float_t         yIntercept;
    Float_t         xSlope;
    Float_t         ySlope;
-   Float_t         x1;
-   Float_t         y1;
-   Float_t         x2;
-   Float_t         y2;
+   Float_t         x_dut[3];
+   Float_t         y_dut[3];
    Float_t         chi2;
    Int_t           ntracks;
 
@@ -74,10 +72,8 @@ public :
    TBranch        *b_yIntercept;   //!
    TBranch        *b_xSlope;   //!
    TBranch        *b_ySlope;   //!
-   TBranch        *b_x1;   //!
-   TBranch        *b_y1;   //!
-   TBranch        *b_x2;   //!
-   TBranch        *b_y2;   //!
+   TBranch        *b_x_dut;   //!
+   TBranch        *b_y_dut;   //!
    TBranch        *b_chi2;   //!
    TBranch        *b_ntracks;   //!
 
@@ -210,10 +206,8 @@ void pulse::Init(TTree *tree)
    fChain->SetBranchAddress("yIntercept", &yIntercept, &b_yIntercept);
    fChain->SetBranchAddress("xSlope", &xSlope, &b_xSlope);
    fChain->SetBranchAddress("ySlope", &ySlope, &b_ySlope);
-   fChain->SetBranchAddress("x1", &x1, &b_x1);
-   fChain->SetBranchAddress("y1", &y1, &b_y1);
-   fChain->SetBranchAddress("x2", &x2, &b_x2);
-   fChain->SetBranchAddress("y2", &y2, &b_y2);
+   fChain->SetBranchAddress("x_dut", &x_dut, &b_x_dut);
+   fChain->SetBranchAddress("y_dut", &y_dut, &b_y_dut);
    fChain->SetBranchAddress("chi2", &chi2, &b_chi2);
    fChain->SetBranchAddress("ntracks", &ntracks, &b_ntracks);
    Notify();
