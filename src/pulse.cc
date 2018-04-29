@@ -235,8 +235,8 @@ void pulse::MakeEfficiencyVsXY(int channelNumber, int nbins, float threshold, fl
   //Activate Only Necessary Branches
   fChain->SetBranchStatus("*", 0);
   fChain->SetBranchStatus("amp", 1);
-  fChain->SetBranchStatus("x_dut[0]", 1);
-  fChain->SetBranchStatus("y_dut[0]", 1);
+  fChain->SetBranchStatus("x_dut", 1);
+  fChain->SetBranchStatus("y_dut", 1);
   fChain->SetBranchStatus("ntracks", 1);
   fChain->SetBranchStatus("chi2", 1);
   fChain->SetBranchStatus("xSlope", 1);
@@ -768,10 +768,8 @@ std::pair<float,float> pulse::MPV_vs_Position( int dut, TString coor, const int 
   
   fChain->SetBranchStatus("*", 0);
   fChain->SetBranchStatus("amp", 1);
-  fChain->SetBranchStatus("x_dut[0]", 1);
-  fChain->SetBranchStatus("y_dut[0]", 1);
-  fChain->SetBranchStatus("x_dut[1]", 1);
-  fChain->SetBranchStatus("y_dut[1]", 1);
+  fChain->SetBranchStatus("x_dut", 1);
+  fChain->SetBranchStatus("y_dut", 1);
   if (fChain == 0) return std::pair<float,float>(-999,0);
   Long64_t nentries = fChain->GetEntriesFast();
   Long64_t nbytes = 0, nb = 0;
@@ -882,10 +880,8 @@ std::pair<float,float> pulse::MPV_vs_Position_ROOFIT( int dut, TString coor, con
   
   fChain->SetBranchStatus("*", 0);
   fChain->SetBranchStatus("amp", 1);
-  fChain->SetBranchStatus("x_dut[0]", 1);
-  fChain->SetBranchStatus("y_dut[0]", 1);
-  fChain->SetBranchStatus("x_dut[1]", 1);
-  fChain->SetBranchStatus("y_dut[1]", 1);
+  fChain->SetBranchStatus("x_dut", 1);
+  fChain->SetBranchStatus("y_dut", 1);
   if (fChain == 0) return std::pair<float,float>(-999,0);
   Long64_t nentries = fChain->GetEntriesFast();
   Long64_t nbytes = 0, nb = 0;
@@ -1043,10 +1039,8 @@ std::pair<float,float> pulse::DeltaT_vs_Position( int dut, TString coor, const i
   fChain->SetBranchStatus("linearTime30", 1);
   fChain->SetBranchStatus("LP2_30", 1);
   fChain->SetBranchStatus("linearTime60", 1);
-  fChain->SetBranchStatus("x_dut[0]", 1);
-  fChain->SetBranchStatus("y_dut[0]", 1);
-  fChain->SetBranchStatus("x_dut[1]", 1);
-  fChain->SetBranchStatus("y_dut[1]", 1);
+  fChain->SetBranchStatus("x_dut", 1);
+  fChain->SetBranchStatus("y_dut", 1);
   if (fChain == 0) return std::pair<float,float>(-999,0);
   Long64_t nentries = fChain->GetEntriesFast();
   Long64_t nbytes = 0, nb = 0;
