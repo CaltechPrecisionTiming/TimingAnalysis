@@ -13,6 +13,7 @@
 #include <TString.h>
 #include <TFile.h>
 #include <TH1D.h>
+#include <TH2F.h>
 #include <TF1.h>
 #include <TBox.h>
 #include <TCanvas.h>
@@ -1109,7 +1110,10 @@ std::pair<float,float> pulse::DeltaT_vs_Position( int dut, TString coor, const i
   return result;
 };
 
-void pulse::PlotAll_CFD_DeltaTs(unsigned int channelNumber, unsigned int channelNumberReference)
+void pulse::PlotAll_CFD_DeltaTs(unsigned int channelNumber, unsigned int channelNumberReference,    
+				double SignalAmpLow, double SignalAmpHigh,
+				double RefAmpLow, double RefAmpHigh
+				)
 {
   fChain->SetBranchStatus("*", 0);
   fChain->SetBranchStatus("InterpolatedAmp", 1);
@@ -1136,5 +1140,60 @@ void pulse::PlotAll_CFD_DeltaTs(unsigned int channelNumber, unsigned int channel
   fChain->SetBranchStatus("t0CFD_60",1);
   fChain->SetBranchStatus("t0CFD_70",1);
   fChain->SetBranchStatus("t0CFD_80",1);
+  
+  //**************************
+  //Book Histograms
+  //**************************
+  TH2F* DeltaTVsRefAmp = new TH2F( "DeltaTVsRefAmp"," ; Reference Amplitude [mV]; #Delta t [ns]; Number of Events", 250, 0, 500, 1000, -10,10);
+  TH2F* DeltaTVsLGADAmp = new TH2F( "DeltaTVsLGADAmp"," ; LGAD Amplitude [mV]; #Delta t [ns]; Number of Events", 250, 0, 500, 1000, -10,10);
+  TH1F* DeltaTNoCorr = new TH1F( "DeltaTNoCorr"," ; #Delta t [ns]; Number of Events", 100, -1,1);
+  TH1F* DeltaTRefOnlyCorr = new TH1F( "DeltaTRefOnlyCorr"," ; #Delta t [ns]; Number of Events", 100, -1,1);
+  TH1F* DeltaTAmpCorr = new TH1F( "DeltaTAmpCorr"," ; #Delta t [ns]; Number of Events", 100, -1,1);
+  TH1F* DeltaTToTCorr = new TH1F( "DeltaTToTCorr"," ; #Delta t [ns]; Number of Events", 100, -1,1);
+
+  //**************************
+  //Event Loop
+  //**************************
+  if (fChain == 0) return;
+  Long64_t nentries = fChain->GetEntriesFast();
+  Long64_t nbytes = 0, nb = 0;
+  for (Long64_t jentry=0; jentry<nentries;jentry++) {
+    Long64_t ientry = LoadTree(jentry);
+    if (ientry < 0) break;
+    if (jentry % 10000 == 0) cout << "Processing Event " << jentry << " of " << nentries << "\n";
+    
+    nb = fChain->GetEntry(jentry);   nbytes += nb;
+
+    //***************
+    //Selection Cuts
+    //***************    
+    //require photek to show MIP signal
+    if (!(InterpolatedAmp[channelNumberReference] > RefAmpLow && InterpolatedAmp[channelNumberReference] < RefAmpHigh)) continue;
+    //require LGAD to show MIP signal
+    if (!(InterpolatedAmp[channelNumber] > SignalAmpLow && InterpolatedAmp[channelNumber] < SignalAmpHigh)) continue;
+
+    //******************************
+    //Fill time walk histograms
+    //******************************
+    
+
+   }
+
+
+
+
+
+  //Activate all branches back to normal
+  fChain->SetBranchStatus("*", 1);
+  
+  //save plots
+  TFile *file = new TFile(Form("eff_Channel%d.root", channelNumber),"UPDATE");
+  file->cd();
+  // file->WriteTObject(effX, "Efficiency_X", "WriteDelete");
+  file->Close();
+  delete file;
+  
 
 };
+
+

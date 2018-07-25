@@ -348,7 +348,9 @@ public :
   void MakeEfficiencyVsXY(int channelNumber, int nbins, float threshold, float xmin, float xmax, float ymin, float ymax,
 			  float photek_low = 0.1, float photek_high = 0.3);
 
-  void PlotAll_CFD_DeltaTs(unsigned int channelNumber, unsigned int channelNumberReference);
+  void PlotAll_CFD_DeltaTs(unsigned int channelNumber, unsigned int channelNumberReference,
+			   double SignalAmpLow = 100, double SignalAmpHigh = 240,
+			   double RefAmpLow = 50, double RefAmpHigh = 130);
 
 };
 
