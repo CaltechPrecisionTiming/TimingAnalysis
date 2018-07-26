@@ -1121,6 +1121,7 @@ void pulse::PlotAll_CFD_DeltaTs(unsigned int channelNumber, unsigned int channel
   fChain->SetBranchStatus("t0_15",1);
   fChain->SetBranchStatus("t0_20",1);
   fChain->SetBranchStatus("t0_25",1);
+  fChain->SetBranchStatus("t0_30",1);
   fChain->SetBranchStatus("t0_35",1);
   fChain->SetBranchStatus("t0_40",1);
   fChain->SetBranchStatus("t0_45",1);
@@ -1140,17 +1141,56 @@ void pulse::PlotAll_CFD_DeltaTs(unsigned int channelNumber, unsigned int channel
   fChain->SetBranchStatus("t0CFD_60",1);
   fChain->SetBranchStatus("t0CFD_70",1);
   fChain->SetBranchStatus("t0CFD_80",1);
+  fChain->SetBranchStatus("t0CFD_90",1);
   
   //**************************
   //Book Histograms
   //**************************
-  TH2F* DeltaTVsRefAmp = new TH2F( "DeltaTVsRefAmp"," ; Reference Amplitude [mV]; #Delta t [ns]; Number of Events", 250, 0, 500, 1000, -10,10);
-  TH2F* DeltaTVsLGADAmp = new TH2F( "DeltaTVsLGADAmp"," ; LGAD Amplitude [mV]; #Delta t [ns]; Number of Events", 250, 0, 500, 1000, -10,10);
-  TH1F* DeltaTNoCorr = new TH1F( "DeltaTNoCorr"," ; #Delta t [ns]; Number of Events", 100, -1,1);
-  TH1F* DeltaTRefOnlyCorr = new TH1F( "DeltaTRefOnlyCorr"," ; #Delta t [ns]; Number of Events", 100, -1,1);
-  TH1F* DeltaTAmpCorr = new TH1F( "DeltaTAmpCorr"," ; #Delta t [ns]; Number of Events", 100, -1,1);
-  TH1F* DeltaTToTCorr = new TH1F( "DeltaTToTCorr"," ; #Delta t [ns]; Number of Events", 100, -1,1);
+  vector<string> ToTThresholds;
+  ToTThresholds.push_back("10");
+  ToTThresholds.push_back("15");
+  ToTThresholds.push_back("20");
+  ToTThresholds.push_back("25");
+  ToTThresholds.push_back("30");
+  ToTThresholds.push_back("35");
+  ToTThresholds.push_back("40");
+  ToTThresholds.push_back("45");
+  ToTThresholds.push_back("50");
+  ToTThresholds.push_back("75");
+  ToTThresholds.push_back("100");
+  vector<string> CFDThresholds;
+  CFDThresholds.push_back("5");
+  CFDThresholds.push_back("10");
+  CFDThresholds.push_back("15");
+  CFDThresholds.push_back("20");
+  CFDThresholds.push_back("25");
+  CFDThresholds.push_back("30");
+  CFDThresholds.push_back("35");
+  CFDThresholds.push_back("40");
+  CFDThresholds.push_back("45");
+  CFDThresholds.push_back("50");
+  CFDThresholds.push_back("60");
+  CFDThresholds.push_back("70");
+  CFDThresholds.push_back("80");
+  vector<TH2F*> DeltaTToTVsLGADAmp;
+  vector<TH2F*> DeltaTCFDVsLGADAmp;
+  vector<TH1F*> DeltaTToT_NoTWCorr;
+  vector<TH1F*> DeltaTToT_WithTWCorr;
+  vector<TH1F*> DeltaTCFD_NoTWCorr;
+  vector<TH1F*> DeltaTCFD_WithTWCorr;
+  
+  for(int i=0; i<ToTThresholds.size();i++) {
+    DeltaTToTVsLGADAmp.push_back( new TH2F( Form("DeltaTToTVsLGADAmp_",ToTThresholds[i].c_str())," ; LGAD Amplitude [mV]; #Delta t [ns]; Number of Events", 250, 0, 500, 1000, -10,10));
+    DeltaTToT_NoTWCorr.push_back( new TH1F( Form("DeltaTToT_NoTWCorr_",ToTThresholds[i].c_str()), "; #Delta t [ns]; Number of Events", 100, -1,1));
+    DeltaTToT_WithTWCorr.push_back( new TH1F( Form("DeltaTToT_WithTWCorr_",ToTThresholds[i].c_str()), "; #Delta t [ns]; Number of Events", 100, -1,1));
+  }
 
+  for(int i=0; i<CFDThresholds.size();i++) {
+    DeltaTCFDVsLGADAmp.push_back( new TH2F( Form("DeltaTCFDVsLGADAmp_",ToTThresholds[i].c_str())," ; LGAD Amplitude [mV]; #Delta t [ns]; Number of Events", 250, 0, 500, 1000, -10,10));
+    DeltaTCFD_NoTWCorr.push_back( new TH1F( Form("DeltaTCFD_NoTWCorr_",ToTThresholds[i].c_str()), "; #Delta t [ns]; Number of Events", 100, -1,1));
+    DeltaTCFD_WithTWCorr.push_back( new TH1F( Form("DeltaTCFD_WithTWCorr_",ToTThresholds[i].c_str()), "; #Delta t [ns]; Number of Events", 100, -1,1));
+  }  
+   
   //**************************
   //Event Loop
   //**************************
@@ -1175,10 +1215,41 @@ void pulse::PlotAll_CFD_DeltaTs(unsigned int channelNumber, unsigned int channel
     //******************************
     //Fill time walk histograms
     //******************************
-    
-
-   }
-
+    double tRef = t0CFD_20[channelNumberReference];
+    double amp = InterpolatedAmp[channelNumber];
+    for(int i=0; i<ToTThresholds.size();i++) {
+      double tSig = 0;
+      if (ToTThresholds[i]=="10") tSig = t0_10[channelNumber];
+      if (ToTThresholds[i]=="15") tSig = t0_15[channelNumber];
+      if (ToTThresholds[i]=="20") tSig = t0_20[channelNumber];
+      if (ToTThresholds[i]=="25") tSig = t0_25[channelNumber];
+      if (ToTThresholds[i]=="30") tSig = t0_30[channelNumber];
+      if (ToTThresholds[i]=="35") tSig = t0_35[channelNumber];
+      if (ToTThresholds[i]=="40") tSig = t0_40[channelNumber];
+      if (ToTThresholds[i]=="45") tSig = t0_45[channelNumber];
+      if (ToTThresholds[i]=="50") tSig = t0_50[channelNumber];
+      if (ToTThresholds[i]=="75") tSig = t0_75[channelNumber];
+      if (ToTThresholds[i]=="100") tSig = t0_100[channelNumber];
+      DeltaTToTVsLGADAmp[i]->Fill(amp, tSig-tRef);
+    }
+    for(int i=0; i<CFDThresholds.size();i++) {
+      double tSig = 0;
+      if (CFDThresholds[i] == "5") tSig = t0CFD_5[channelNumber];
+      if (CFDThresholds[i] == "10") tSig = t0CFD_10[channelNumber];
+      if (CFDThresholds[i] == "15") tSig = t0CFD_15[channelNumber];
+      if (CFDThresholds[i] == "20") tSig = t0CFD_20[channelNumber];
+      if (CFDThresholds[i] == "25") tSig = t0CFD_25[channelNumber];
+      if (CFDThresholds[i] == "30") tSig = t0CFD_30[channelNumber];
+      if (CFDThresholds[i] == "35") tSig = t0CFD_35[channelNumber];
+      if (CFDThresholds[i] == "40") tSig = t0CFD_40[channelNumber];
+      if (CFDThresholds[i] == "45") tSig = t0CFD_45[channelNumber];
+      if (CFDThresholds[i] == "50") tSig = t0CFD_50[channelNumber];
+      if (CFDThresholds[i] == "60") tSig = t0CFD_60[channelNumber];
+      if (CFDThresholds[i] == "70") tSig = t0CFD_70[channelNumber];
+      if (CFDThresholds[i] == "80") tSig = t0CFD_80[channelNumber];
+      DeltaTCFDVsLGADAmp[i]->Fill(amp, tSig-tRef);
+    }     
+  }  
 
 
 
@@ -1187,8 +1258,11 @@ void pulse::PlotAll_CFD_DeltaTs(unsigned int channelNumber, unsigned int channel
   fChain->SetBranchStatus("*", 1);
   
   //save plots
-  TFile *file = new TFile(Form("eff_Channel%d.root", channelNumber),"UPDATE");
+  TFile *file = new TFile(Form("output_CH%d.root", channelNumber),"UPDATE");
   file->cd();
+  for(int i=0; i<ToTThresholds.size();i++) file->WriteTObject(DeltaTToTVsLGADAmp[i], Form("DeltaTToTVsLGADAmp_%s",ToTThresholds[i].c_str()), "WriteDelete");
+  for(int i=0; i<CFDThresholds.size();i++) file->WriteTObject(DeltaTCFDVsLGADAmp[i], Form("DeltaTCFDVsLGADAmp_%s",CFDThresholds[i].c_str()), "WriteDelete");
+
   // file->WriteTObject(effX, "Efficiency_X", "WriteDelete");
   file->Close();
   delete file;

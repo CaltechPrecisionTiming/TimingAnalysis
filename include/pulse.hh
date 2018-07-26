@@ -94,6 +94,9 @@ public :
     Float_t         t0_25[4];
     Float_t         t1_25[4];
     Float_t         tot_25[4];
+    Float_t         t0_30[4];
+    Float_t         t1_30[4];
+    Float_t         tot_30[4];
     Float_t         t0_35[4];
     Float_t         t1_35[4];
     Float_t         tot_35[4];
@@ -235,6 +238,9 @@ public :
    TBranch        *b_t0_25;   //!
    TBranch        *b_t1_25;   //!
    TBranch        *b_tot_25;   //!
+   TBranch        *b_t0_30;   //!
+   TBranch        *b_t1_30;   //!
+   TBranch        *b_tot_30;   //!
    TBranch        *b_t0_35;   //!
    TBranch        *b_t1_35;   //!
    TBranch        *b_tot_35;   //!
@@ -485,6 +491,9 @@ void pulse::Init(TTree *tree)
    fChain->SetBranchAddress("t0_25", t0_25, &b_t0_25);
    fChain->SetBranchAddress("t1_25", t1_25, &b_t1_25);
    fChain->SetBranchAddress("tot_25", tot_25, &b_tot_25);
+   fChain->SetBranchAddress("t0_30", t0_30, &b_t0_30);
+   fChain->SetBranchAddress("t1_30", t1_30, &b_t1_30);
+   fChain->SetBranchAddress("tot_30", tot_30, &b_tot_30);
    fChain->SetBranchAddress("t0_35", t0_35, &b_t0_35);
    fChain->SetBranchAddress("t1_35", t1_35, &b_t1_35);
    fChain->SetBranchAddress("tot_35", tot_35, &b_tot_35);
