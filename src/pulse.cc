@@ -15,6 +15,7 @@
 #include <TH1D.h>
 #include <TH2F.h>
 #include <TF1.h>
+#include <TProfile.h>
 #include <TBox.h>
 #include <TCanvas.h>
 #include <TGraph.h>
@@ -1181,18 +1182,18 @@ void pulse::PlotAll_CFD_DeltaTs(unsigned int channelNumber, unsigned int channel
   
   for(int i=0; i<ToTThresholds.size();i++) {
     DeltaTToTVsLGADAmp.push_back( new TH2F( Form("DeltaTToTVsLGADAmp_",ToTThresholds[i].c_str())," ; LGAD Amplitude [mV]; #Delta t [ns]; Number of Events", 250, 0, 500, 1000, -10,10));
-    DeltaTToT_NoTWCorr.push_back( new TH1F( Form("DeltaTToT_NoTWCorr_",ToTThresholds[i].c_str()), "; #Delta t [ns]; Number of Events", 100, -1,1));
-    DeltaTToT_WithTWCorr.push_back( new TH1F( Form("DeltaTToT_WithTWCorr_",ToTThresholds[i].c_str()), "; #Delta t [ns]; Number of Events", 100, -1,1));
+    DeltaTToT_NoTWCorr.push_back( new TH1F( Form("DeltaTToT_NoTWCorr_",ToTThresholds[i].c_str()), "; #Delta t [ns]; Number of Events", 1000, -10,10));
+    DeltaTToT_WithTWCorr.push_back( new TH1F( Form("DeltaTToT_WithTWCorr_",ToTThresholds[i].c_str()), "; #Delta t [ns]; Number of Events", 1000, -10,10));
   }
 
   for(int i=0; i<CFDThresholds.size();i++) {
     DeltaTCFDVsLGADAmp.push_back( new TH2F( Form("DeltaTCFDVsLGADAmp_",ToTThresholds[i].c_str())," ; LGAD Amplitude [mV]; #Delta t [ns]; Number of Events", 250, 0, 500, 1000, -10,10));
-    DeltaTCFD_NoTWCorr.push_back( new TH1F( Form("DeltaTCFD_NoTWCorr_",ToTThresholds[i].c_str()), "; #Delta t [ns]; Number of Events", 100, -1,1));
-    DeltaTCFD_WithTWCorr.push_back( new TH1F( Form("DeltaTCFD_WithTWCorr_",ToTThresholds[i].c_str()), "; #Delta t [ns]; Number of Events", 100, -1,1));
+    DeltaTCFD_NoTWCorr.push_back( new TH1F( Form("DeltaTCFD_NoTWCorr_",ToTThresholds[i].c_str()), "; #Delta t [ns]; Number of Events", 1000, -10,10));
+    DeltaTCFD_WithTWCorr.push_back( new TH1F( Form("DeltaTCFD_WithTWCorr_",ToTThresholds[i].c_str()), "; #Delta t [ns]; Number of Events", 1000, -10,10));
   }  
    
   //**************************
-  //Event Loop
+  //First Event Loop
   //**************************
   if (fChain == 0) return;
   Long64_t nentries = fChain->GetEntriesFast();
@@ -1217,6 +1218,8 @@ void pulse::PlotAll_CFD_DeltaTs(unsigned int channelNumber, unsigned int channel
     //******************************
     double tRef = t0CFD_20[channelNumberReference];
     double amp = InterpolatedAmp[channelNumber];
+
+
     for(int i=0; i<ToTThresholds.size();i++) {
       double tSig = 0;
       if (ToTThresholds[i]=="10") tSig = t0_10[channelNumber];
@@ -1231,6 +1234,7 @@ void pulse::PlotAll_CFD_DeltaTs(unsigned int channelNumber, unsigned int channel
       if (ToTThresholds[i]=="75") tSig = t0_75[channelNumber];
       if (ToTThresholds[i]=="100") tSig = t0_100[channelNumber];
       DeltaTToTVsLGADAmp[i]->Fill(amp, tSig-tRef);
+      DeltaTToT_NoTWCorr[i]->Fill(tSig-tRef);
     }
     for(int i=0; i<CFDThresholds.size();i++) {
       double tSig = 0;
@@ -1248,20 +1252,332 @@ void pulse::PlotAll_CFD_DeltaTs(unsigned int channelNumber, unsigned int channel
       if (CFDThresholds[i] == "70") tSig = t0CFD_70[channelNumber];
       if (CFDThresholds[i] == "80") tSig = t0CFD_80[channelNumber];
       DeltaTCFDVsLGADAmp[i]->Fill(amp, tSig-tRef);
+      DeltaTCFD_NoTWCorr[i]->Fill(tSig-tRef);
     }     
   }  
 
+  //********************************************************
+  //Calculate Time walk corrections
+  //********************************************************
+  vector<TProfile*> DeltaTToTVsLGADAmp_Profile;
+  vector<TProfile*> DeltaTCFDVsLGADAmp_Profile;
+  vector<TF1*> DeltaTToTVsLGADAmp_ProfileFitFunction;
+  vector<TF1*> DeltaTCFDVsLGADAmp_ProfileFitFunction;
+  double ToTValues[ToTThresholds.size()];
+  double ToTValuesErr[ToTThresholds.size()];
+  double CFDValues[CFDThresholds.size()];
+  double CFDValuesErr[CFDThresholds.size()];
+  double TimewalkSlopeToT[ToTThresholds.size()];
+  double TimewalkSlopeToTErr[ToTThresholds.size()];
+  double TimewalkSlopeCFD[CFDThresholds.size()];
+  double TimewalkSlopeCFDErr[CFDThresholds.size()];
+  
+  for(int i=0; i<ToTThresholds.size();i++) {
+    DeltaTToTVsLGADAmp_Profile.push_back(DeltaTToTVsLGADAmp[i]->ProfileX(Form("DeltaTToTVsLGADAmp_Profile_%s",ToTThresholds[i].c_str())));
+    DeltaTToTVsLGADAmp_ProfileFitFunction.push_back(new TF1(Form("DeltaTToTVsLGADAmp_ProfileFitFunction_%s",ToTThresholds[i].c_str()), "pol1", SignalAmpLow, SignalAmpHigh));
+    DeltaTToTVsLGADAmp_Profile[i]->Fit(Form("DeltaTToTVsLGADAmp_ProfileFitFunction_%s",ToTThresholds[i].c_str()),"RQ");
+    cout << ToTThresholds[i] << " : " << DeltaTToTVsLGADAmp_ProfileFitFunction[i]->GetParameter(1) << " +/- "
+	 << DeltaTToTVsLGADAmp_ProfileFitFunction[i]->GetParError(1)
+	 << "\n";
+    ToTValues[i] = atoi(ToTThresholds[i].c_str());
+    ToTValuesErr[i] = 0.0;
+    TimewalkSlopeToT[i] = DeltaTToTVsLGADAmp_ProfileFitFunction[i]->GetParameter(1) * (1000 * 100);
+    TimewalkSlopeToTErr[i] = DeltaTToTVsLGADAmp_ProfileFitFunction[i]->GetParError(1) * (1000 * 100);
+  }
+  for(int i=0; i<CFDThresholds.size();i++) {
+    DeltaTCFDVsLGADAmp_Profile.push_back(DeltaTCFDVsLGADAmp[i]->ProfileX(Form("DeltaTCFDVsLGADAmp_Profile_%s",CFDThresholds[i].c_str())));
+    DeltaTCFDVsLGADAmp_ProfileFitFunction.push_back(new TF1(Form("DeltaTCFDVsLGADAmp_ProfileFitFunction_%s",CFDThresholds[i].c_str()), "pol1", SignalAmpLow, SignalAmpHigh));
+    DeltaTCFDVsLGADAmp_Profile[i]->Fit(Form("DeltaTCFDVsLGADAmp_ProfileFitFunction_%s",CFDThresholds[i].c_str()),"RQ");
+   cout << CFDThresholds[i] << " : " << DeltaTCFDVsLGADAmp_ProfileFitFunction[i]->GetParameter(1) << " +/- "
+	 << DeltaTCFDVsLGADAmp_ProfileFitFunction[i]->GetParError(1)
+	 << "\n";
+    CFDValues[i] = atoi(CFDThresholds[i].c_str());
+    CFDValuesErr[i] = 0.0;
+    TimewalkSlopeCFD[i] = DeltaTCFDVsLGADAmp_ProfileFitFunction[i]->GetParameter(1) * (1000 * 100);
+    TimewalkSlopeCFDErr[i] = DeltaTCFDVsLGADAmp_ProfileFitFunction[i]->GetParError(1)* (1000 * 100);
+   }
+  
+  //Make Graphs of the timewalk slope
+  TGraphErrors *TimewalkSlopeGraphToT = new TGraphErrors(ToTThresholds.size(), ToTValues, TimewalkSlopeToT, ToTValuesErr, TimewalkSlopeToTErr);
+  TimewalkSlopeGraphToT->GetYaxis()->SetTitle(" Time Drift [ ps / 100mV ] ");
+  TimewalkSlopeGraphToT->GetXaxis()->SetTitle(" ToT Threshold [ mV ] ");
+  TGraphErrors *TimewalkSlopeGraphCFD = new TGraphErrors(CFDThresholds.size(), CFDValues, TimewalkSlopeCFD, CFDValuesErr, TimewalkSlopeCFDErr);
+  TimewalkSlopeGraphCFD->GetYaxis()->SetTitle(" Time Drift [ ps / 100mV ] ");
+  TimewalkSlopeGraphCFD->GetXaxis()->SetTitle(" CFD Threshold [ % ] ");
+
+
+  //********************************************************
+  //Calculate Mean and Resolutions
+  //********************************************************
+  double DeltaTMeanToT[ToTThresholds.size()];
+  double DeltaTMeanCFD[ToTThresholds.size()];
+  double DeltaTSigmaToT_NoTWCorr[ToTThresholds.size()];
+  double DeltaTSigmaErrToT_NoTWCorr[ToTThresholds.size()];
+  double DeltaTSigmaCFD_NoTWCorr[ToTThresholds.size()];
+  double DeltaTSigmaErrCFD_NoTWCorr[ToTThresholds.size()];
+  double DeltaTSigmaCFD_WithTWCorr[ToTThresholds.size()];
+  double DeltaTSigmaErrCFD_WithTWCorr[ToTThresholds.size()];
+  double DeltaTSigmaToT_WithTWCorr[ToTThresholds.size()];
+  double DeltaTSigmaErrToT_WithTWCorr[ToTThresholds.size()];
+
+  for(int i=0; i<ToTThresholds.size();i++) {
+    TF1 *tmpFunction = new TF1("tmpGaus", "gaus",-100,100);
+    DeltaTToT_NoTWCorr[i]->Fit("tmpGaus", "RQ");    
+    cout << ToTThresholds[i] << " : " << tmpFunction->GetParameter(1) << " +/- "
+	 << tmpFunction->GetParError(1)
+	 << "\n";
+    DeltaTMeanToT[i] = tmpFunction->GetParameter(1);   
+  }
+  for(int i=0; i<CFDThresholds.size();i++) {
+    TF1 *tmpFunction = new TF1("tmpGaus", "gaus",-100,100);
+    DeltaTCFD_NoTWCorr[i]->Fit("tmpGaus", "RQ");
+    cout << CFDThresholds[i] << " : " << tmpFunction->GetParameter(1) << " +/- "
+	 << tmpFunction->GetParError(1)
+	 << "\n";
+    DeltaTMeanCFD[i] = tmpFunction->GetParameter(1);    
+  }
+ 
+  //Reset the NoTWCorr histograms
+  for(int i=0; i<ToTThresholds.size();i++) { 
+    delete DeltaTToT_NoTWCorr[i];
+    DeltaTToT_NoTWCorr[i] = new TH1F( Form("DeltaTToT_NoTWCorr_",ToTThresholds[i].c_str()), "; #Delta t [ns]; Number of Events", 1000, -10,10);    
+  }
+  for(int i=0; i<CFDThresholds.size();i++) {
+    delete DeltaTCFD_NoTWCorr[i];
+    DeltaTCFD_NoTWCorr[i] = new TH1F( Form("DeltaTCFD_NoTWCorr_",CFDThresholds[i].c_str()), "; #Delta t [ns]; Number of Events", 1000, -10,10);    
+  }  
+
+  //Second Event Loop to perform Timewalk correction
+  nentries = fChain->GetEntriesFast();
+  nbytes = 0, nb = 0;
+  for (Long64_t jentry=0; jentry<nentries;jentry++) {
+    Long64_t ientry = LoadTree(jentry);
+    if (ientry < 0) break;
+    if (jentry % 10000 == 0) cout << "Processing Event " << jentry << " of " << nentries << "\n";
+    
+    nb = fChain->GetEntry(jentry);   nbytes += nb;
+
+    //***************
+    //Selection Cuts
+    //***************    
+    //require photek to show MIP signal
+    if (!(InterpolatedAmp[channelNumberReference] > RefAmpLow && InterpolatedAmp[channelNumberReference] < RefAmpHigh)) continue;
+    //require LGAD to show MIP signal
+    if (!(InterpolatedAmp[channelNumber] > SignalAmpLow && InterpolatedAmp[channelNumber] < SignalAmpHigh)) continue;
+
+    //******************************
+    //Fill delta T histograms
+    //******************************
+    double tRef = t0CFD_20[channelNumberReference];
+    double amp = InterpolatedAmp[channelNumber];
+
+    for(int i=0; i<ToTThresholds.size();i++) {
+      double tSig = 0;
+      if (ToTThresholds[i]=="10") tSig = t0_10[channelNumber];
+      if (ToTThresholds[i]=="15") tSig = t0_15[channelNumber];
+      if (ToTThresholds[i]=="20") tSig = t0_20[channelNumber];
+      if (ToTThresholds[i]=="25") tSig = t0_25[channelNumber];
+      if (ToTThresholds[i]=="30") tSig = t0_30[channelNumber];
+      if (ToTThresholds[i]=="35") tSig = t0_35[channelNumber];
+      if (ToTThresholds[i]=="40") tSig = t0_40[channelNumber];
+      if (ToTThresholds[i]=="45") tSig = t0_45[channelNumber];
+      if (ToTThresholds[i]=="50") tSig = t0_50[channelNumber];
+      if (ToTThresholds[i]=="75") tSig = t0_75[channelNumber];
+      if (ToTThresholds[i]=="100") tSig = t0_100[channelNumber];
+      DeltaTToT_NoTWCorr[i]->Fill(tSig-tRef-DeltaTMeanToT[i]);
+
+      double TWCorrection =  DeltaTToTVsLGADAmp_ProfileFitFunction[i]->GetParameter(0) + amp * DeltaTToTVsLGADAmp_ProfileFitFunction[i]->GetParameter(1);
+      DeltaTToT_WithTWCorr[i]->Fill(tSig-tRef-TWCorrection);
+    }
+    for(int i=0; i<CFDThresholds.size();i++) {
+      double tSig = 0;
+      if (CFDThresholds[i] == "5") tSig = t0CFD_5[channelNumber];
+      if (CFDThresholds[i] == "10") tSig = t0CFD_10[channelNumber];
+      if (CFDThresholds[i] == "15") tSig = t0CFD_15[channelNumber];
+      if (CFDThresholds[i] == "20") tSig = t0CFD_20[channelNumber];
+      if (CFDThresholds[i] == "25") tSig = t0CFD_25[channelNumber];
+      if (CFDThresholds[i] == "30") tSig = t0CFD_30[channelNumber];
+      if (CFDThresholds[i] == "35") tSig = t0CFD_35[channelNumber];
+      if (CFDThresholds[i] == "40") tSig = t0CFD_40[channelNumber];
+      if (CFDThresholds[i] == "45") tSig = t0CFD_45[channelNumber];
+      if (CFDThresholds[i] == "50") tSig = t0CFD_50[channelNumber];
+      if (CFDThresholds[i] == "60") tSig = t0CFD_60[channelNumber];
+      if (CFDThresholds[i] == "70") tSig = t0CFD_70[channelNumber];
+      if (CFDThresholds[i] == "80") tSig = t0CFD_80[channelNumber];
+      DeltaTCFD_NoTWCorr[i]->Fill(tSig-tRef-DeltaTMeanCFD[i]);
+      
+      double TWCorrection =  DeltaTCFDVsLGADAmp_ProfileFitFunction[i]->GetParameter(0) + amp * DeltaTCFDVsLGADAmp_ProfileFitFunction[i]->GetParameter(1);
+      DeltaTCFD_WithTWCorr[i]->Fill(tSig-tRef-TWCorrection);
+    }     
+  }  
+
+  //********************************************************
+  //Make Time Resolution Graphs
+  //********************************************************
+  for(int i=0; i<ToTThresholds.size();i++) {
+    TF1 *tmpFunction = new TF1("tmpGaus", "gaus",-100,100);
+    DeltaTToT_NoTWCorr[i]->Fit("tmpGaus", "RQ");    
+    cout << ToTThresholds[i] << " : " << tmpFunction->GetParameter(2) << " +/- "
+	 << tmpFunction->GetParError(2)
+	 << "\n";
+    DeltaTSigmaToT_NoTWCorr[i] = tmpFunction->GetParameter(2) * 1000;   
+    DeltaTSigmaErrToT_NoTWCorr[i] = tmpFunction->GetParError(2) * 1000;   
+    delete tmpFunction;
+    
+    tmpFunction = new TF1("tmpGaus", "gaus",-100,100);
+    DeltaTToT_WithTWCorr[i]->Fit("tmpGaus", "RQ");    
+    cout << ToTThresholds[i] << " : " << tmpFunction->GetParameter(2) << " +/- "
+	 << tmpFunction->GetParError(2)
+	 << "\n";
+    DeltaTSigmaToT_WithTWCorr[i] = tmpFunction->GetParameter(2) * 1000;   
+    DeltaTSigmaErrToT_WithTWCorr[i] = tmpFunction->GetParError(2) * 1000; 
+    delete tmpFunction;
+  }
+ for(int i=0; i<CFDThresholds.size();i++) {
+    TF1 *tmpFunction = new TF1("tmpGaus", "gaus",-100,100);
+    DeltaTCFD_NoTWCorr[i]->Fit("tmpGaus", "RQ");    
+    cout << CFDThresholds[i] << " : " << tmpFunction->GetParameter(2) << " +/- "
+	 << tmpFunction->GetParError(2)
+	 << "\n";
+    DeltaTSigmaCFD_NoTWCorr[i] = tmpFunction->GetParameter(2) * 1000;   
+    DeltaTSigmaErrCFD_NoTWCorr[i] = tmpFunction->GetParError(2) * 1000;   
+    delete tmpFunction;
+    
+    tmpFunction = new TF1("tmpGaus", "gaus",-100,100);
+    DeltaTCFD_WithTWCorr[i]->Fit("tmpGaus", "RQ");    
+    cout << CFDThresholds[i] << " : " << tmpFunction->GetParameter(2) << " +/- "
+	 << tmpFunction->GetParError(2)
+	 << "\n";
+    DeltaTSigmaCFD_WithTWCorr[i] = tmpFunction->GetParameter(2) * 1000;   
+    DeltaTSigmaErrCFD_WithTWCorr[i] = tmpFunction->GetParError(2) * 1000; 
+    delete tmpFunction;
+  }
+
+  //Make Graphs of the time resolution vs threshold
+ TGraphErrors *TimeResolutionVsThresholdToT_NoTWCorr = new TGraphErrors(ToTThresholds.size(), ToTValues, DeltaTSigmaToT_NoTWCorr, ToTValuesErr, DeltaTSigmaErrToT_NoTWCorr);
+ TimeResolutionVsThresholdToT_NoTWCorr->GetYaxis()->SetTitle(" Time Resolution [ ps ] ");
+ TimeResolutionVsThresholdToT_NoTWCorr->GetXaxis()->SetTitle(" ToT Threshold [ mV ] ");
+ TGraphErrors *TimeResolutionVsThresholdToT_WithTWCorr = new TGraphErrors(ToTThresholds.size(), ToTValues, DeltaTSigmaToT_WithTWCorr, ToTValuesErr, DeltaTSigmaErrToT_WithTWCorr);
+ TimeResolutionVsThresholdToT_WithTWCorr->GetYaxis()->SetTitle(" Time Resolution [ ps ] ");
+ TimeResolutionVsThresholdToT_WithTWCorr->GetXaxis()->SetTitle(" ToT Threshold [ mV ] ");
+ TGraphErrors *TimeResolutionVsThresholdCFD_NoTWCorr = new TGraphErrors(CFDThresholds.size(), CFDValues, DeltaTSigmaCFD_NoTWCorr, CFDValuesErr, DeltaTSigmaErrCFD_NoTWCorr);
+ TimeResolutionVsThresholdCFD_NoTWCorr->GetYaxis()->SetTitle(" Time Resolution [ ps ] ");
+ TimeResolutionVsThresholdCFD_NoTWCorr->GetXaxis()->SetTitle(" CFD Threshold [ mV ] ");
+ TGraphErrors *TimeResolutionVsThresholdCFD_WithTWCorr = new TGraphErrors(CFDThresholds.size(), CFDValues, DeltaTSigmaCFD_WithTWCorr, CFDValuesErr, DeltaTSigmaErrCFD_WithTWCorr);
+ TimeResolutionVsThresholdCFD_WithTWCorr->GetYaxis()->SetTitle(" Time Resolution [ ps ] ");
+ TimeResolutionVsThresholdCFD_WithTWCorr->GetXaxis()->SetTitle(" CFD Threshold [ mV ] ");
+ 
+
+ //********************************************************
+ //Make Resolution Plot
+ //********************************************************
+ TCanvas *cv = 0;
+ TLegend *leg = 0;
 
 
 
+ cv = new TCanvas("cv","cv", 800,800);
+  cv->SetHighLightColor(2);
+   cv->Range(0,0,1,1);
+   cv->SetFillColor(0);
+   cv->SetBorderMode(0);
+   cv->SetBorderSize(2);
+   cv->SetFrameBorderMode(0);
+ TimeResolutionVsThresholdToT_NoTWCorr->SetTitle("Time Resolution Vs ToT Threshold");
+ TimeResolutionVsThresholdToT_NoTWCorr->Draw("AP"); 
+ TimeResolutionVsThresholdToT_WithTWCorr->Draw("Psame");
+ TimeResolutionVsThresholdToT_NoTWCorr->GetXaxis()->SetRangeUser(15,110);
+ TimeResolutionVsThresholdToT_NoTWCorr->GetYaxis()->SetRangeUser(0,100);
+ TimeResolutionVsThresholdToT_NoTWCorr->GetYaxis()->SetTitleOffset(1.3);
+ TimeResolutionVsThresholdToT_NoTWCorr->SetMarkerColor(kBlue);
+ TimeResolutionVsThresholdToT_NoTWCorr->SetMarkerStyle(20);
+ TimeResolutionVsThresholdToT_NoTWCorr->SetMarkerSize(1);
+ TimeResolutionVsThresholdToT_WithTWCorr->SetMarkerColor(kRed);
+ TimeResolutionVsThresholdToT_WithTWCorr->SetMarkerStyle(20);
+ TimeResolutionVsThresholdToT_WithTWCorr->SetMarkerSize(1);
+ TimeResolutionVsThresholdToT_NoTWCorr->SetLineWidth(2);
+ TimeResolutionVsThresholdToT_WithTWCorr->SetLineWidth(2);
+ TimeResolutionVsThresholdToT_NoTWCorr->SetLineColor(kBlue);
+ TimeResolutionVsThresholdToT_WithTWCorr->SetLineColor(kRed);
+ leg = new TLegend(0.2,0.6,0.5,0.8,NULL,"brNDC");
+ leg->SetTextSize(0.03);
+ leg->SetBorderSize(0);
+ leg->SetLineColor(1);
+ leg->SetLineStyle(1);
+ leg->SetLineWidth(1);
+ leg->SetFillColor(0);
+ leg->SetFillStyle(0);
+ leg->AddEntry(TimeResolutionVsThresholdToT_NoTWCorr,"No Timewalk Correction","L");
+ leg->AddEntry(TimeResolutionVsThresholdToT_WithTWCorr,"With Timewalk Correction","L");
+ leg->Draw();
+ cv->SaveAs("TimeResolutionVsThresholdToT.gif");
+ cv->SaveAs("TimeResolutionVsThresholdToT.C");
+
+
+ cv = new TCanvas("cv","cv", 800,800);
+ TimeResolutionVsThresholdCFD_NoTWCorr->SetTitle("Time Resolution Vs CFD Threshold");
+ TimeResolutionVsThresholdCFD_NoTWCorr->Draw("AP");
+ TimeResolutionVsThresholdCFD_WithTWCorr->Draw("Psame");
+ TimeResolutionVsThresholdCFD_NoTWCorr->GetXaxis()->SetRangeUser(7,90);
+ TimeResolutionVsThresholdCFD_NoTWCorr->GetYaxis()->SetRangeUser(0,100);
+ TimeResolutionVsThresholdCFD_NoTWCorr->GetYaxis()->SetTitleOffset(1.3);
+ TimeResolutionVsThresholdCFD_NoTWCorr->SetMarkerColor(kBlue);
+ TimeResolutionVsThresholdCFD_NoTWCorr->SetMarkerStyle(20);
+ TimeResolutionVsThresholdCFD_NoTWCorr->SetMarkerSize(1);
+ TimeResolutionVsThresholdCFD_WithTWCorr->SetMarkerColor(kRed);
+ TimeResolutionVsThresholdCFD_WithTWCorr->SetMarkerStyle(20);
+ TimeResolutionVsThresholdCFD_WithTWCorr->SetMarkerSize(1);
+ TimeResolutionVsThresholdCFD_NoTWCorr->SetLineWidth(2);
+ TimeResolutionVsThresholdCFD_WithTWCorr->SetLineWidth(2);
+ TimeResolutionVsThresholdCFD_NoTWCorr->SetLineColor(kBlue);
+ TimeResolutionVsThresholdCFD_WithTWCorr->SetLineColor(kRed);
+ leg = new TLegend(0.2,0.6,0.5,0.8,NULL,"brNDC" );
+ leg->SetTextSize(0.03);
+ leg->SetBorderSize(0);
+ leg->SetLineColor(1);
+ leg->SetLineStyle(1);
+ leg->SetLineWidth(1);
+ leg->SetFillColor(0);
+ leg->SetFillStyle(0);
+ leg->AddEntry(TimeResolutionVsThresholdCFD_NoTWCorr,"No Timewalk Correction","L");
+ leg->AddEntry(TimeResolutionVsThresholdCFD_WithTWCorr,"With Timewalk Correction","L");
+ leg->Draw();
+ cv->SaveAs("TimeResolutionVsThresholdCFD.gif");
+ cv->SaveAs("TimeResolutionVsThresholdCFD.C");
+
+
+
+  //********************************************************
   //Activate all branches back to normal
+  //********************************************************
   fChain->SetBranchStatus("*", 1);
   
+  //********************************************************
   //save plots
+  //********************************************************
   TFile *file = new TFile(Form("output_CH%d.root", channelNumber),"UPDATE");
-  file->cd();
-  for(int i=0; i<ToTThresholds.size();i++) file->WriteTObject(DeltaTToTVsLGADAmp[i], Form("DeltaTToTVsLGADAmp_%s",ToTThresholds[i].c_str()), "WriteDelete");
-  for(int i=0; i<CFDThresholds.size();i++) file->WriteTObject(DeltaTCFDVsLGADAmp[i], Form("DeltaTCFDVsLGADAmp_%s",CFDThresholds[i].c_str()), "WriteDelete");
+  file->cd(); 
+  for(int i=0; i<ToTThresholds.size();i++) {
+    file->WriteTObject(DeltaTToTVsLGADAmp[i], Form("DeltaTToTVsLGADAmp_%s",ToTThresholds[i].c_str()), "WriteDelete");
+    file->WriteTObject(DeltaTToTVsLGADAmp_ProfileFitFunction[i], Form("DeltaTToTVsLGADAmp_ProfileFitFunction_%s",ToTThresholds[i].c_str()), "WriteDelete");
+    file->WriteTObject(DeltaTToTVsLGADAmp_Profile[i], Form("DeltaTToTVsLGADAmp_Profile_%s",ToTThresholds[i].c_str()),  "WriteDelete");
+    file->WriteTObject(DeltaTToT_NoTWCorr[i], Form("DeltaTToT_NoTWCorr_%s",ToTThresholds[i].c_str()),  "WriteDelete");
+    file->WriteTObject(DeltaTToT_WithTWCorr[i], Form("DeltaTToT_WithTWCorr_%s",ToTThresholds[i].c_str()),  "WriteDelete");
+  }
+  for(int i=0; i<CFDThresholds.size();i++) {
+    file->WriteTObject(DeltaTCFDVsLGADAmp[i], Form("DeltaTCFDVsLGADAmp_%s",CFDThresholds[i].c_str()), "WriteDelete");
+    file->WriteTObject(DeltaTCFDVsLGADAmp_ProfileFitFunction[i], Form("DeltaTCFDVsLGADAmp_ProfileFitFunction_%s",CFDThresholds[i].c_str()), "WriteDelete");
+    file->WriteTObject(DeltaTCFDVsLGADAmp_Profile[i], Form("DeltaTCFDVsLGADAmp_Profile_%s",CFDThresholds[i].c_str()),  "WriteDelete");  
+    file->WriteTObject(DeltaTCFD_NoTWCorr[i], Form("DeltaTCFD_NoTWCorr_%s",CFDThresholds[i].c_str()),  "WriteDelete");
+    file->WriteTObject(DeltaTCFD_WithTWCorr[i], Form("DeltaTCFD_WithTWCorr_%s",CFDThresholds[i].c_str()),  "WriteDelete");
+  }
+
+  file->WriteTObject(TimewalkSlopeGraphToT, "TimewalkSlopeGraphToT","WriteDelete");
+  file->WriteTObject(TimewalkSlopeGraphCFD, "TimewalkSlopeGraphCFD","WriteDelete");
+  file->WriteTObject(TimeResolutionVsThresholdToT_NoTWCorr, "TimeResolutionVsThresholdToT_NoTWCorr","WriteDelete");
+  file->WriteTObject(TimeResolutionVsThresholdToT_WithTWCorr, "TimeResolutionVsThresholdToT_WithTWCorr","WriteDelete");
+  file->WriteTObject(TimeResolutionVsThresholdCFD_NoTWCorr, "TimeResolutionVsThresholdCFD_NoTWCorr","WriteDelete");
+  file->WriteTObject(TimeResolutionVsThresholdCFD_WithTWCorr, "TimeResolutionVsThresholdCFD_WithTWCorr","WriteDelete");
 
   // file->WriteTObject(effX, "Efficiency_X", "WriteDelete");
   file->Close();
