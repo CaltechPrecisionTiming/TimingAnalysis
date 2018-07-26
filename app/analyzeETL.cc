@@ -41,27 +41,27 @@ int main( int argc, char** argv)
   //TTree* myTree = (TTree*)fin->Get("pulse");
 
   TChain *myChain = new TChain("pulse");
-  // if ( inputRootFile != "" ) myChain->Add(inputRootFile.c_str());
-  // else {
-  //   cout << "Reading input files from the list : " << inputListFile << "\n";
-  //   ifstream inListFile;
-  //   inListFile.open (inputListFile.c_str(), ios::in);
-  //   if (inListFile.is_open()) {
-  //     string tempFilename;
-  //     char temp;
-  //     while (! inListFile.eof ()) {
-  // 	//getline (inListFile, temp);
-  // 	inListFile >> tempFilename;
-  // 	cout << "Adding file: " << tempFilename << "\n";
-  // 	myChain->Add(tempFilename.c_str());
-  //     }
-  //   } else {
-  //     std::cerr << "[ERROR]: List file provided " << inputListFile << " does not exist.\n";
-  //     return -1;
-  //   }
-  // }
+  if ( inputRootFile != "" ) myChain->Add(inputRootFile.c_str());
+  else {
+    cout << "Reading input files from the list : " << inputListFile << "\n";
+    ifstream inListFile;
+    inListFile.open (inputListFile.c_str(), ios::in);
+    if (inListFile.is_open()) {
+      string tempFilename;
+      char temp;
+      while (! inListFile.eof ()) {
+  	//getline (inListFile, temp);
+  	inListFile >> tempFilename;
+  	cout << "Adding file: " << tempFilename << "\n";
+  	myChain->Add(tempFilename.c_str());
+      }
+    } else {
+      std::cerr << "[ERROR]: List file provided " << inputListFile << " does not exist.\n";
+      return -1;
+    }
+  }
   
-  myChain->Add("dataMarch/RECO/v1/RawDataSaver0NetScope_Run1251_0_Raw.root");
+  //myChain->Add("dataMarch/RECO/v1/RawDataSaver0NetScope_Run1251_0_Raw.root");
   //myChain->Add("data/RECO/v2/DataCMSVMETiming_Run1222.root");
   // TTree *myTree = (TTree*)myChain->GetTree();
   // assert(myTree);
