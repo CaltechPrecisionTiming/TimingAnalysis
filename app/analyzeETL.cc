@@ -41,56 +41,70 @@ int main( int argc, char** argv)
   //TTree* myTree = (TTree*)fin->Get("pulse");
 
   TChain *myChain = new TChain("pulse");
-  if ( inputRootFile != "" ) myChain->Add(inputRootFile.c_str());
-  else {
-    cout << "Reading input files from the list : " << inputListFile << "\n";
-    ifstream inListFile;
-    inListFile.open (inputListFile.c_str(), ios::in);
-    if (inListFile.is_open()) {
-      string tempFilename;
-      char temp;
-      while (! inListFile.eof ()) {
-  	//getline (inListFile, temp);
-  	inListFile >> tempFilename;
-  	cout << "Adding file: " << tempFilename << "\n";
-  	myChain->Add(tempFilename.c_str());
-      }
-    } else {
-      std::cerr << "[ERROR]: List file provided " << inputListFile << " does not exist.\n";
-      return -1;
-    }
-  }
+  // if ( inputRootFile != "" ) myChain->Add(inputRootFile.c_str());
+  // else {
+  //   cout << "Reading input files from the list : " << inputListFile << "\n";
+  //   ifstream inListFile;
+  //   inListFile.open (inputListFile.c_str(), ios::in);
+  //   if (inListFile.is_open()) {
+  //     string tempFilename;
+  //     char temp;
+  //     while (! inListFile.eof ()) {
+  // 	//getline (inListFile, temp);
+  // 	inListFile >> tempFilename;
+  // 	cout << "Adding file: " << tempFilename << "\n";
+  // 	myChain->Add(tempFilename.c_str());
+  //     }
+  //   } else {
+  //     std::cerr << "[ERROR]: List file provided " << inputListFile << " does not exist.\n";
+  //     return -1;
+  //   }
+  // }
+ 
   
-  //myChain->Add("dataMarch/RECO/v1/RawDataSaver0NetScope_Run1251_0_Raw.root");
-  //myChain->Add("data/RECO/v2/DataCMSVMETiming_Run1222.root");
-  // TTree *myTree = (TTree*)myChain->GetTree();
-  // assert(myTree);
+  // //---------------------------------------------
+  // //March 2018 Run 1251 CH3(Photek), CH2(W6 pre-rad @ 330V)
+  // //------------------------  ---------------------
+  // myChain->Add("dataMarch/RECO/v1/RawDataSaver0NetScope_Run1251_0_Raw.root");
+
+  // //---------------------------------------------
+  // //March 2018 Run 1260 CH1(Photek), CH2(W6 1.5E15 @ 590V)
+  // //------------------------  ---------------------
+  // myChain->Add("dataMarch/RECO/v1/RawDataSaver0NetScope_Run1260_0_Raw.root");
+
+  // //---------------------------------------------
+  // //March 2018 Run 1262 CH1(Photek), CH2(W6 1.5E15 @ 560V)
+  // //------------------------  ---------------------
+  // // myChain->Add("dataMarch/RECO/v1/RawDataSaver0NetScope_Run1262_0_Raw.root");
+
+  // // ---------------------------------------------
+  // // March 2018 Run 1260+1262 CH1(Photek), CH3(W6 8E14 @ 520V)
+  // // ------------------------  ---------------------
+  // myChain->Add("dataMarch/RECO/v1/RawDataSaver0NetScope_Run1260+1262.root");
+
+
+
   pulse* myPulse = new pulse( myChain  );
 
-  const int kGausTimestampOption = 0;
-  const int kLinearTime45TimestampOption = 1;
+  // //------------------------------------------------
+  // //March 2018 Run 1251 CH3(Photek), CH2(W6 pre-rad @ 330V)
+  // //------------------------------------------------
+  // myPulse->PlotAll_CFD_DeltaTs(1,2, 50, 130, 100, 240);
 
-  
-  // //------------------------
-  // //Run 1208 CH1(pre-rad), CH2(W6 1.5E15), CH3(W6 8E14)
-  // //------------------------
-  // //Efficiency
-  // myPulse->MakeEfficiencyVsXY(1, 200, 20, 17.4, 18.2, 17.9, 18.6, 50, 110);
-  
-  // //MPV
-  // myPulse->CreateMPV_vs_PositionHisto(1, 3, 250, 0.02, 0.1, 11100., 13500., 20500, 23000.);
-  //myPulse->CreateMPV_vs_PositionHisto(1, 4, 250, 0.02, 0.1, 11100., 13500., 23500, 26000.);
-  //myPulse->CreateMPV_vs_PositionHisto(1, 5, 250, 0.02, 0.1, 13800., 16500., 23500, 26000.);
-  //myPulse->CreateMPV_vs_PositionHisto(1, 6, 250, 0.02, 0.1, 13800., 16500., 20500, 23000.);
+  // //------------------------------------------------
+  // //March 2018 Run 1260 CH1(Photek), CH2(W6 1.5E15 @ 590V)
+  // //------------------------  ------------------------
+  // myPulse->PlotAll_CFD_DeltaTs(1,0, 35, 150, 60, 160);
 
-  //------------------------
-  //Run 1251 CH3(Photek), CH2(W6 pre-rad)
-  //------------------------  
-  myPulse->PlotAll_CFD_DeltaTs(2,1, 100, 240, 50, 130);
+  // //------------------------------------------------
+  // //March 2018 Run 1262 CH1(Photek), CH2(W6 1.5E15 @ 560V)
+  // //------------------------  ------------------------
+  // myPulse->PlotAll_CFD_DeltaTs(1,0, 30, 130, 60, 160);
 
+  // //------------------------------------------------
+  // //March 2018 Run 1262 CH1(Photek), CH2(W6 8E14 @ 520V)
+  // //------------------------  ------------------------
+  // myPulse->PlotAll_CFD_DeltaTs(2,0, 100, 240, 60, 160);
  
-
-  
-
   return 0;
 }
