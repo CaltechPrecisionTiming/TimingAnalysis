@@ -82,39 +82,39 @@ public :
     Float_t         LP2_75mV[4];
     Float_t         LP2_100mV[4];
     Float_t         InterpolatedAmp[4];
-    Float_t         t0_10[4];
-    Float_t         t1_10[4];
-    Float_t         tot_10[4];
+    Float_t         t0_3[4];
+    Float_t         t1_3[4];
+    Float_t         tot_3[4];
+    Float_t         t0_6[4];
+    Float_t         t1_6[4];
+    Float_t         tot_6[4];
+    Float_t         t0_9[4];
+    Float_t         t1_9[4];
+    Float_t         tot_9[4];
+    Float_t         t0_12[4];
+    Float_t         t1_12[4];
+    Float_t         tot_12[4];
     Float_t         t0_15[4];
     Float_t         t1_15[4];
     Float_t         tot_15[4];
-    Float_t         t0_20[4];
-    Float_t         t1_20[4];
-    Float_t         tot_20[4];
-    Float_t         t0_25[4];
-    Float_t         t1_25[4];
-    Float_t         tot_25[4];
+    Float_t         t0_18[4];
+    Float_t         t1_18[4];
+    Float_t         tot_18[4];
+    Float_t         t0_21[4];
+    Float_t         t1_21[4];
+    Float_t         tot_21[4];
+    Float_t         t0_24[4];
+    Float_t         t1_24[4];
+    Float_t         tot_24[4];
+    Float_t         t0_27[4];
+    Float_t         t1_27[4];
+    Float_t         tot_27[4];
     Float_t         t0_30[4];
     Float_t         t1_30[4];
     Float_t         tot_30[4];
-    Float_t         t0_35[4];
-    Float_t         t1_35[4];
-    Float_t         tot_35[4];
-    Float_t         t0_40[4];
-    Float_t         t1_40[4];
-    Float_t         tot_40[4];
-    Float_t         t0_45[4];
-    Float_t         t1_45[4];
-    Float_t         tot_45[4];
-    Float_t         t0_50[4];
-    Float_t         t1_50[4];
-    Float_t         tot_50[4];
-    Float_t         t0_75[4];
-    Float_t         t1_75[4];
-    Float_t         tot_75[4];
-    Float_t         t0_100[4];
-    Float_t         t1_100[4];
-    Float_t         tot_100[4];
+    Float_t         t0_33[4];
+    Float_t         t1_33[4];
+    Float_t         tot_33[4];
     Float_t         t0CFD_5[4];
     Float_t         t1CFD_5[4];
     Float_t         totCFD_5[4];
@@ -226,39 +226,39 @@ public :
    TBranch        *b_LP2_75mV;   //!
    TBranch        *b_LP2_100mV;   //!
    TBranch        *b_InterpolatedAmp;   //!
-   TBranch        *b_t0_10;   //!
-   TBranch        *b_t1_10;   //!
-   TBranch        *b_tot_10;   //!
+   TBranch        *b_t0_3;   //!
+   TBranch        *b_t1_3;   //!
+   TBranch        *b_tot_3;   //!
+   TBranch        *b_t0_6;   //!
+   TBranch        *b_t1_6;   //!
+   TBranch        *b_tot_6;   //!
+   TBranch        *b_t0_9;   //!
+   TBranch        *b_t1_9;   //!
+   TBranch        *b_tot_9;   //!
+   TBranch        *b_t0_12;   //!
+   TBranch        *b_t1_12;   //!
+   TBranch        *b_tot_12;   //!
    TBranch        *b_t0_15;   //!
    TBranch        *b_t1_15;   //!
    TBranch        *b_tot_15;   //!
-   TBranch        *b_t0_20;   //!
-   TBranch        *b_t1_20;   //!
-   TBranch        *b_tot_20;   //!
-   TBranch        *b_t0_25;   //!
-   TBranch        *b_t1_25;   //!
-   TBranch        *b_tot_25;   //!
+   TBranch        *b_t0_18;   //!
+   TBranch        *b_t1_18;   //!
+   TBranch        *b_tot_18;   //!
+   TBranch        *b_t0_21;   //!
+   TBranch        *b_t1_21;   //!
+   TBranch        *b_tot_21;   //!
+   TBranch        *b_t0_24;   //!
+   TBranch        *b_t1_24;   //!
+   TBranch        *b_tot_24;   //!
+   TBranch        *b_t0_27;   //!
+   TBranch        *b_t1_27;   //!
+   TBranch        *b_tot_27;   //!
    TBranch        *b_t0_30;   //!
    TBranch        *b_t1_30;   //!
    TBranch        *b_tot_30;   //!
-   TBranch        *b_t0_35;   //!
-   TBranch        *b_t1_35;   //!
-   TBranch        *b_tot_35;   //!
-   TBranch        *b_t0_40;   //!
-   TBranch        *b_t1_40;   //!
-   TBranch        *b_tot_40;   //!
-   TBranch        *b_t0_45;   //!
-   TBranch        *b_t1_45;   //!
-   TBranch        *b_tot_45;   //!
-   TBranch        *b_t0_50;   //!
-   TBranch        *b_t1_50;   //!
-   TBranch        *b_tot_50;   //!
-   TBranch        *b_t0_75;   //!
-   TBranch        *b_t1_75;   //!
-   TBranch        *b_tot_75;   //!
-   TBranch        *b_t0_100;   //!
-   TBranch        *b_t1_100;   //!
-   TBranch        *b_tot_100;   //!
+   TBranch        *b_t0_33;   //!
+   TBranch        *b_t1_33;   //!
+   TBranch        *b_tot_33;   //!
    TBranch        *b_t0CFD_5;   //!
    TBranch        *b_t1CFD_5;   //!
    TBranch        *b_totCFD_5;   //!
@@ -357,6 +357,8 @@ public :
   void PlotAll_CFD_DeltaTs(unsigned int channelNumber, unsigned int channelNumberReference,
 			   double SignalAmpLow = 100, double SignalAmpHigh = 240,
 			   double RefAmpLow = 50, double RefAmpHigh = 130);
+
+  void PlotAll_CFD_DeltaTs_SIM(unsigned int channelNumber, double SignalAmpLow = 100, double SignalAmpHigh = 240);
 
 };
 
@@ -479,39 +481,39 @@ void pulse::Init(TTree *tree)
    fChain->SetBranchAddress("LP2_75mV", LP2_75mV, &b_LP2_75mV);
    fChain->SetBranchAddress("LP2_100mV", LP2_100mV, &b_LP2_100mV);
    fChain->SetBranchAddress("InterpolatedAmp", InterpolatedAmp, &b_InterpolatedAmp);
-   fChain->SetBranchAddress("t0_10", t0_10, &b_t0_10);
-   fChain->SetBranchAddress("t1_10", t1_10, &b_t1_10);
-   fChain->SetBranchAddress("tot_10", tot_10, &b_tot_10);
+   fChain->SetBranchAddress("t0_3", t0_3, &b_t0_3);
+   fChain->SetBranchAddress("t1_3", t1_3, &b_t1_3);
+   fChain->SetBranchAddress("tot_3", tot_3, &b_tot_3);
+   fChain->SetBranchAddress("t0_6", t0_6, &b_t0_6);
+   fChain->SetBranchAddress("t1_6", t1_6, &b_t1_6);
+   fChain->SetBranchAddress("tot_6", tot_6, &b_tot_6);
+   fChain->SetBranchAddress("t0_9", t0_9, &b_t0_9);
+   fChain->SetBranchAddress("t1_9", t1_9, &b_t1_9);
+   fChain->SetBranchAddress("tot_9", tot_9, &b_tot_9);
+   fChain->SetBranchAddress("t0_12", t0_12, &b_t0_12);
+   fChain->SetBranchAddress("t1_12", t1_12, &b_t1_12);
+   fChain->SetBranchAddress("tot_12", tot_12, &b_tot_12);
    fChain->SetBranchAddress("t0_15", t0_15, &b_t0_15);
    fChain->SetBranchAddress("t1_15", t1_15, &b_t1_15);
    fChain->SetBranchAddress("tot_15", tot_15, &b_tot_15);
-   fChain->SetBranchAddress("t0_20", t0_20, &b_t0_20);
-   fChain->SetBranchAddress("t1_20", t1_20, &b_t1_20);
-   fChain->SetBranchAddress("tot_20", tot_20, &b_tot_20);
-   fChain->SetBranchAddress("t0_25", t0_25, &b_t0_25);
-   fChain->SetBranchAddress("t1_25", t1_25, &b_t1_25);
-   fChain->SetBranchAddress("tot_25", tot_25, &b_tot_25);
+   fChain->SetBranchAddress("t0_18", t0_18, &b_t0_18);
+   fChain->SetBranchAddress("t1_18", t1_18, &b_t1_18);
+   fChain->SetBranchAddress("tot_18", tot_18, &b_tot_18);
+   fChain->SetBranchAddress("t0_21", t0_21, &b_t0_21);
+   fChain->SetBranchAddress("t1_21", t1_21, &b_t1_21);
+   fChain->SetBranchAddress("tot_21", tot_21, &b_tot_21);
+   fChain->SetBranchAddress("t0_24", t0_24, &b_t0_24);
+   fChain->SetBranchAddress("t1_24", t1_24, &b_t1_24);
+   fChain->SetBranchAddress("tot_24", tot_24, &b_tot_24);
+   fChain->SetBranchAddress("t0_27", t0_27, &b_t0_27);
+   fChain->SetBranchAddress("t1_27", t1_27, &b_t1_27);
+   fChain->SetBranchAddress("tot_27", tot_27, &b_tot_27);
    fChain->SetBranchAddress("t0_30", t0_30, &b_t0_30);
    fChain->SetBranchAddress("t1_30", t1_30, &b_t1_30);
    fChain->SetBranchAddress("tot_30", tot_30, &b_tot_30);
-   fChain->SetBranchAddress("t0_35", t0_35, &b_t0_35);
-   fChain->SetBranchAddress("t1_35", t1_35, &b_t1_35);
-   fChain->SetBranchAddress("tot_35", tot_35, &b_tot_35);
-   fChain->SetBranchAddress("t0_40", t0_40, &b_t0_40);
-   fChain->SetBranchAddress("t1_40", t1_40, &b_t1_40);
-   fChain->SetBranchAddress("tot_40", tot_40, &b_tot_40);
-   fChain->SetBranchAddress("t0_45", t0_45, &b_t0_45);
-   fChain->SetBranchAddress("t1_45", t1_45, &b_t1_45);
-   fChain->SetBranchAddress("tot_45", tot_45, &b_tot_45);
-   fChain->SetBranchAddress("t0_50", t0_50, &b_t0_50);
-   fChain->SetBranchAddress("t1_50", t1_50, &b_t1_50);
-   fChain->SetBranchAddress("tot_50", tot_50, &b_tot_50);
-   fChain->SetBranchAddress("t0_75", t0_75, &b_t0_75);
-   fChain->SetBranchAddress("t1_75", t1_75, &b_t1_75);
-   fChain->SetBranchAddress("tot_75", tot_75, &b_tot_75);
-   fChain->SetBranchAddress("t0_100", t0_100, &b_t0_100);
-   fChain->SetBranchAddress("t1_100", t1_100, &b_t1_100);
-   fChain->SetBranchAddress("tot_100", tot_100, &b_tot_100);
+   fChain->SetBranchAddress("t0_33", t0_33, &b_t0_33);
+   fChain->SetBranchAddress("t1_33", t1_33, &b_t1_33);
+   fChain->SetBranchAddress("tot_33", tot_33, &b_tot_33);
    fChain->SetBranchAddress("t0CFD_5", t0CFD_5, &b_t0CFD_5);
    fChain->SetBranchAddress("t1CFD_5", t1CFD_5, &b_t1CFD_5);
    fChain->SetBranchAddress("totCFD_5", totCFD_5, &b_totCFD_5);

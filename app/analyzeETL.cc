@@ -21,7 +21,7 @@ std::string ParseCommandLine( int argc, char* argv[], std::string opt )
 	  if ( tmp.find( "--" ) != std::string::npos ) return "yes";
 	}
     }
-  
+
   return "";
 };
 
@@ -60,23 +60,23 @@ int main( int argc, char** argv)
       return -1;
     }
   }
-  
+
   //myChain->Add("dataMarch/RECO/v1/RawDataSaver0NetScope_Run1251_0_Raw.root");
   //myChain->Add("data/RECO/v2/DataCMSVMETiming_Run1222.root");
   // TTree *myTree = (TTree*)myChain->GetTree();
   // assert(myTree);
-  pulse* myPulse = new pulse( myChain  );
+  pulse* myPulse = new pulse( myChain );
 
   const int kGausTimestampOption = 0;
   const int kLinearTime45TimestampOption = 1;
 
-  
+
   // //------------------------
   // //Run 1208 CH1(pre-rad), CH2(W6 1.5E15), CH3(W6 8E14)
   // //------------------------
   // //Efficiency
   // myPulse->MakeEfficiencyVsXY(1, 200, 20, 17.4, 18.2, 17.9, 18.6, 50, 110);
-  
+
   // //MPV
   // myPulse->CreateMPV_vs_PositionHisto(1, 3, 250, 0.02, 0.1, 11100., 13500., 20500, 23000.);
   //myPulse->CreateMPV_vs_PositionHisto(1, 4, 250, 0.02, 0.1, 11100., 13500., 23500, 26000.);
@@ -85,12 +85,12 @@ int main( int argc, char** argv)
 
   //------------------------
   //Run 1251 CH3(Photek), CH2(W6 pre-rad)
-  //------------------------  
-  myPulse->PlotAll_CFD_DeltaTs(2,1, 100, 240, 50, 130);
+  //------------------------
+  myPulse->PlotAll_CFD_DeltaTs_SIM(0,0, 240);
 
- 
 
-  
+
+
 
   return 0;
 }
