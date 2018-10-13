@@ -92,10 +92,10 @@ void pulse::GetAmp( int ch )
 
    h_amp->Draw();
    cv->SaveAs(Form("amp_ch%d.pdf",ch));
-   
-   
+
+
    return;
-};    
+};
 
 void pulse::GetAmps( )
 {
@@ -111,7 +111,7 @@ void pulse::GetAmps( )
    float bin_width = (x_high-x_low)/(float)nbins;
    //define saturation level
    float saturation = 450;//mV
-   
+
    for ( int ch = 0; ch < 36; ch++ )
      {
        h_amp[ch]  = new TH1F( Form("amp_channel%d",ch), Form("amp_channel%d",ch), nbins, x_low, x_high);
@@ -152,7 +152,7 @@ void pulse::GetAmps( )
 	 }
        mpv_histo[ch] = h_amp[ch]->GetBinLowEdge(max_bin);
      }
-   
+
    TCanvas *cv = new TCanvas("Cv","Cv", 800,800);
    cv->SetLeftMargin(0.13);
    cv->SetBottomMargin(0.12);
@@ -170,10 +170,10 @@ void pulse::GetAmps( )
        h_amp[ch]->Draw();
        cv->SaveAs(Form("amp_ch%d.pdf",ch));
      }
-   
-   
+
+
    return;
-}; 
+};
 
 void pulse::GetDeltaT( )
 {
@@ -181,9 +181,10 @@ void pulse::GetDeltaT( )
    Long64_t nentries = fChain->GetEntriesFast();
 
    TH1F* h_dt[36];
-   for ( int ch = 0; ch < 36; ch++ )
+   //for ( int ch = 0; ch < 36; ch++ )
+   for ( int ch = 0; ch < 4; ch++ )
      h_dt[ch] = new TH1F( Form("dt_channel%d",ch), Form("dt_channel%d",ch), 200,-5, 5);
-   
+
    Long64_t nbytes = 0, nb = 0;
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
       Long64_t ientry = LoadTree(jentry);
@@ -210,10 +211,10 @@ void pulse::GetDeltaT( )
        h_dt[ch]->Draw();
        cv->SaveAs(Form("dt_ch%d.pdf",ch));
      }
-   
-   
+
+
    return;
-}; 
+};
 
 
 
@@ -226,7 +227,7 @@ void pulse::MakeEfficiencyVsXY(int channelNumber, int nbins, float threshold, fl
   float histo_x_max = 30.;
   float histo_y_min = 10.;
   float histo_y_max = 30.;
-  
+
   TH1F *histY_den = new TH1F("histX_den",";Y [mm];Number of Events", nbins, histo_y_min, histo_y_max);
   TH1F *histY_num = new TH1F("histX_num",";Y [mm];Number of Events", nbins, histo_y_min, histo_y_max);
   TH1F *histX_den = new TH1F("histY_den",";X [mm];Number of Events", nbins, histo_x_min, histo_x_max);
@@ -241,7 +242,7 @@ void pulse::MakeEfficiencyVsXY(int channelNumber, int nbins, float threshold, fl
   fChain->SetBranchStatus("chi2", 1);
   fChain->SetBranchStatus("xSlope", 1);
   fChain->SetBranchStatus("ySlope", 1);
-   
+
   if (fChain == 0) return;
    Long64_t nentries = fChain->GetEntriesFast();
    Long64_t nbytes = 0, nb = 0;
@@ -253,13 +254,13 @@ void pulse::MakeEfficiencyVsXY(int channelNumber, int nbins, float threshold, fl
       nb = fChain->GetEntry(jentry);   nbytes += nb;
 
       //cuts
-   
+
       //require photek to show MIP signal
       if (!(amp[0] > photek_low && amp[0] < photek_high)) continue;
 
       //reject events with more than 1 track
       if ( !(ntracks == 1 && chi2 < 10 )) continue;
-      
+
       // if ( !(fabs(xSlope) < 5e-4 && fabs(ySlope) < 5e-4)) continue;
       //if ( !(fabs(xSlope) < 1e-3 && (fabs(ySlope) < 4e-3) && fabs(ySlope) > 3e-3)) continue;
       //if ( !(fabs(xSlope + 1.12687e-04) < 5e-4 && fabs(ySlope + 3.546e-3) < 5e-4)) continue; //For CNM W9HG11 Run 838-839-841
@@ -275,18 +276,18 @@ void pulse::MakeEfficiencyVsXY(int channelNumber, int nbins, float threshold, fl
 	    histX_num->Fill( x_dut[0] );
 	}
       }
-      
+
       if ( x_dut[2] > xmin && x_dut[2] < xmax ) {
 	histY_den->Fill(y_dut[2] );
 	if ( amp[channelNumber] > threshold ) {
-	  histY_num->Fill( y_dut[2] );       
-	} 
+	  histY_num->Fill( y_dut[2] );
+	}
       }
-    
-	      
+
+
    }
 
-   vector<double> xbins; 
+   vector<double> xbins;
    vector<double> ybins;
    TGraphAsymmErrors* effX = createEfficiencyGraph(histX_num, histX_den,
 						   Form("EfficiencyVsX_Channel%d",channelNumber),
@@ -313,7 +314,7 @@ void pulse::MakeEfficiencyVsXY(int channelNumber, int nbins, float threshold, fl
        effX->GetPoint( i, x_eff_low, dummy_eff );
        if( dummy_eff > 0.5 ) break;
      }
-   
+
    for ( int i = 1; i <= nbins; i++ )
      {
        effX->GetPoint( nbins-i, x_eff_high, dummy_eff );
@@ -326,13 +327,13 @@ void pulse::MakeEfficiencyVsXY(int channelNumber, int nbins, float threshold, fl
        effY->GetPoint( i, y_eff_low, dummy_eff );
        if( dummy_eff > 0.5 ) break;
      }
-   
+
    for ( int i = 1; i <= nbins; i++ )
      {
        effY->GetPoint( nbins-i, y_eff_high, dummy_eff );
        if( dummy_eff > 0.5 ) break;
      }
-   
+
 
    //std::cout << " x:" << y_eff_low << " - " << y_eff_high << std::endl;
    //Cosmetics
@@ -350,8 +351,8 @@ void pulse::MakeEfficiencyVsXY(int channelNumber, int nbins, float threshold, fl
    effX->GetXaxis()->SetTitle("x-coordinate [mm]");
    effX->GetXaxis()->SetRangeUser( x_eff_low-1., x_eff_high+1.);
    effX->GetYaxis()->SetRangeUser( 0, 1.11);
-   
-     
+
+
    effY->SetTitle("");
    effY->GetXaxis()->SetTitleSize(0.05);
    effY->GetXaxis()->SetTitleOffset(0.87);
@@ -377,10 +378,10 @@ void pulse::MakeEfficiencyVsXY(int channelNumber, int nbins, float threshold, fl
    c->SaveAs(Form("Eff_vs_Y_Ch%d.C",channelNumber));
    delete c;
 
-   
+
    //Activate all branches back to normal
    fChain->SetBranchStatus("*", 1);
-   
+
    TFile *file = new TFile(Form("eff_Channel%d.root", channelNumber),"UPDATE");
    file->cd();
    file->WriteTObject(effX, "Efficiency_X", "WriteDelete");
@@ -390,7 +391,7 @@ void pulse::MakeEfficiencyVsXY(int channelNumber, int nbins, float threshold, fl
    file->WriteTObject(histY_num, "histY_num", "WriteDelete");
    file->WriteTObject(histY_den, "histY_den", "WriteDelete");
    file->Close();
-   delete file; 
+   delete file;
 };
 
 
@@ -406,7 +407,7 @@ void pulse::CreateMPV_vs_PositionHisto( int dut, int channelNumber, float binWid
      }
   //x_init, y_init, and steps are in microns
   //const int npoints = 30;
-   
+
 
   //------------------
   //Define initial positions and step size, all units are in microns
@@ -451,7 +452,7 @@ void pulse::CreateMPV_vs_PositionHisto( int dut, int channelNumber, float binWid
 	  npoints_above_zero_x++;
 	  average_x += mpv_x[i];
 	}
-      
+
       y_pos[i] = y_init + binWidth*(float)i;
       y_pos_un[i] = 0;
       std::pair<float,float> MPVAndError_Y = MPV_vs_Position_ROOFIT( dut, "Y", channelNumber, y_pos[i], binWidth, threshold_low, threshold_high, xmin, xmax,
@@ -469,7 +470,7 @@ void pulse::CreateMPV_vs_PositionHisto( int dut, int channelNumber, float binWid
 	  npoints_above_zero_y++;
 	  average_y += mpv_y[i];
 	}
-      
+
     }
 
   TGraphErrors* gr_mpv_x = new TGraphErrors(niterations, x_pos, mpv_x, x_pos_un, mpv_x_un);
@@ -488,7 +489,7 @@ void pulse::CreateMPV_vs_PositionHisto( int dut, int channelNumber, float binWid
        gr_mpv_x->GetPoint( i, x_eff_low, dummy_eff );
        if( dummy_eff > 0.8*average_x ) break;
      }
-   
+
    for ( int i = 1; i <= niterations; i++ )
      {
        gr_mpv_x->GetPoint( niterations-i, x_eff_high, dummy_eff );
@@ -501,13 +502,13 @@ void pulse::CreateMPV_vs_PositionHisto( int dut, int channelNumber, float binWid
        gr_mpv_y->GetPoint( i, y_eff_low, dummy_eff );
        if( dummy_eff > 0.8*average_y ) break;
      }
-   
+
    for ( int i = 1; i <= niterations; i++ )
      {
        gr_mpv_y->GetPoint( niterations-i, y_eff_high, dummy_eff );
        if( dummy_eff > 0.8*average_y ) break;
      }
-  
+
   //Cosmetics
   gr_mpv_x->GetYaxis()->SetRangeUser(0,2.8*max(average_x,average_y));
   gr_mpv_x->GetXaxis()->SetRangeUser(x_eff_low-1.0,x_eff_high+1.0);
@@ -524,7 +525,7 @@ void pulse::CreateMPV_vs_PositionHisto( int dut, int channelNumber, float binWid
   gr_mpv_x->SetMarkerColor(kBlue);
   gr_mpv_x->SetLineColor(kBlue);
   gr_mpv_x->SetMarkerStyle(20);
-  
+
   gr_mpv_y->GetYaxis()->SetRangeUser(0,2.8*max(average_x,average_y));
   gr_mpv_y->GetXaxis()->SetRangeUser(y_eff_low-1.0,y_eff_high+1.0);
   gr_mpv_y->SetTitle("");
@@ -540,7 +541,7 @@ void pulse::CreateMPV_vs_PositionHisto( int dut, int channelNumber, float binWid
   gr_mpv_y->SetMarkerColor(kBlue);
   gr_mpv_y->SetLineColor(kBlue);
   gr_mpv_y->SetMarkerStyle(20);
-  
+
   TCanvas* c = new TCanvas("canvas","canvas",600,400);
   gr_mpv_x->Draw("AP");
   c->SaveAs(Form("MPV_vs_X_Ch%d.pdf",channelNumber));
@@ -556,9 +557,9 @@ void pulse::CreateMPV_vs_PositionHisto( int dut, int channelNumber, float binWid
 };
 
 
-void pulse::CreateDeltaT_vs_PositionHisto( int dut, int channelNumber, int timestampOption, 
+void pulse::CreateDeltaT_vs_PositionHisto( int dut, int channelNumber, int timestampOption,
 					   float binWidth, float threshold_low, float threshold_high,
-					   float xmin, float xmax, float ymin, float ymax, 
+					   float xmin, float xmax, float ymin, float ymax,
 					   float deltaTMin, float deltaTMax,
 					   bool _isMean,
 					   float photek_low, float photek_high)
@@ -570,7 +571,7 @@ void pulse::CreateDeltaT_vs_PositionHisto( int dut, int channelNumber, int times
      }
   //x_init, y_init, and steps are in microns
   //const int npoints = 30;
-     
+
 
   //------------------
   //Define initial positions and step size, all units are in microns
@@ -621,7 +622,7 @@ void pulse::CreateDeltaT_vs_PositionHisto( int dut, int channelNumber, int times
 	  npoints_above_zero_x++;
 	  average_x += deltaT_x[i];
 	}
-            
+
 
       y_pos[i] = y_init + binWidth*(float)i;
       y_pos_un[i] = 0;
@@ -647,7 +648,7 @@ void pulse::CreateDeltaT_vs_PositionHisto( int dut, int channelNumber, int times
 	  npoints_above_zero_y++;
 	  average_y += deltaT_y[i];
 	}
-      
+
     }
 
   TGraphErrors* gr_deltaT_x = new TGraphErrors(niterations, x_pos, deltaT_x, x_pos_un, deltaT_x_un);
@@ -666,7 +667,7 @@ void pulse::CreateDeltaT_vs_PositionHisto( int dut, int channelNumber, int times
        gr_deltaT_x->GetPoint( i, x_eff_low, dummy_eff );
        if( dummy_eff > 0.8*average_x ) break;
      }
-   
+
    for ( int i = 1; i <= niterations; i++ )
      {
        gr_deltaT_x->GetPoint( niterations-i, x_eff_high, dummy_eff );
@@ -679,13 +680,13 @@ void pulse::CreateDeltaT_vs_PositionHisto( int dut, int channelNumber, int times
        gr_deltaT_y->GetPoint( i, y_eff_low, dummy_eff );
        if( dummy_eff > 0.8*average_y ) break;
      }
-   
+
    for ( int i = 1; i <= niterations; i++ )
      {
        gr_deltaT_y->GetPoint( niterations-i, y_eff_high, dummy_eff );
        if( dummy_eff > 0.8*average_y ) break;
      }
-  
+
    //Cosmetics
    gr_deltaT_x->GetYaxis()->SetRangeUser(deltaTMin, deltaTMax);
    gr_deltaT_x->GetXaxis()->SetRangeUser(xmin*um_to_mm,xmax*um_to_mm);
@@ -703,7 +704,7 @@ void pulse::CreateDeltaT_vs_PositionHisto( int dut, int channelNumber, int times
    gr_deltaT_x->SetMarkerColor(kBlue);
    gr_deltaT_x->SetLineColor(kBlue);
    gr_deltaT_x->SetMarkerStyle(20);
-   
+
    gr_deltaT_y->GetYaxis()->SetRangeUser(deltaTMin, deltaTMax);
    //gr_deltaT_y->GetYaxis()->SetRangeUser(-10000,10000);
    gr_deltaT_y->GetXaxis()->SetRangeUser(ymin*um_to_mm,ymax*um_to_mm);
@@ -721,7 +722,7 @@ void pulse::CreateDeltaT_vs_PositionHisto( int dut, int channelNumber, int times
    gr_deltaT_y->SetMarkerColor(kBlue);
    gr_deltaT_y->SetLineColor(kBlue);
    gr_deltaT_y->SetMarkerStyle(20);
-   
+
   TString fname;
   if ( _isMean )
     {
@@ -765,7 +766,7 @@ std::pair<float,float> pulse::MPV_vs_Position( int dut, TString coor, const int 
       std::cerr << "[ERROR]: please provide a valid dut = <1,2>" << std::endl;
       return std::pair<float,float>(-999,0);
     }
-  
+
   fChain->SetBranchStatus("*", 0);
   fChain->SetBranchStatus("amp", 1);
   fChain->SetBranchStatus("x_dut[0]", 1);
@@ -775,7 +776,7 @@ std::pair<float,float> pulse::MPV_vs_Position( int dut, TString coor, const int 
   if (fChain == 0) return std::pair<float,float>(-999,0);
   Long64_t nentries = fChain->GetEntriesFast();
   Long64_t nbytes = 0, nb = 0;
-  
+
   cout << "Running MPV_vs_Position Analysis\n";
   cout << "Total Events: " << nentries << "\n";
   TH1F* h_mpv = new TH1F("h_mpv", "h_mpv", 100, 0, 0.5);
@@ -785,7 +786,7 @@ std::pair<float,float> pulse::MPV_vs_Position( int dut, TString coor, const int 
       if (ientry < 0) break;
       if (ientry % 10000 == 0) cout << "Processing Event " << ientry << "\n";
       nb = fChain->GetEntry(jentry);   nbytes += nb;
-      
+
       if ( amp[channel] >= AmpLowCut && amp[channel] <= AmpHighCut && amp[0] > photek_low && amp[0] < photek_high )
 	{
 	  if ( dut == 1 )
@@ -814,7 +815,7 @@ std::pair<float,float> pulse::MPV_vs_Position( int dut, TString coor, const int 
   std::string myCoor;
   if ( coor == "X" || coor == "x" ) myCoor = "X";
   if ( coor == "Y" || coor == "y" ) myCoor = "Y";
-  
+
   TString fname = Form("mpv_Channel%d_step%.2f_%s.root", channel,coorLow + step, myCoor.c_str());
   TFile* fout = new TFile(fname, "recreate");
   h_mpv->Write();
@@ -855,31 +856,31 @@ std::pair<float,float> pulse::MPV_vs_Position_ROOFIT( int dut, TString coor, con
   RooRealVar sl("sl", "sigma landau", 0.5e-03, 0, 1.0) ;
   sl.setConstant( kFALSE );
   RooLandau landau("lx", "lx",Amp,ml,sl);
-  
+
   // Construct gauss(t,mg,sg)
   RooRealVar mg("mg", "mg", 0);
   //  RooRealVar sg("sg", "sg", 1.094e-02, 0, 0.003);
   RooRealVar sg("sg", "sg", 1.094e-02, 0, 0.005);
   sg.setConstant( kFALSE );
   RooGaussian gauss("gauss", "gauss", Amp, mg, sg);
-  
+
   //--------------------------------------------------
-  // C o n s t r u c t   c o n v o l u t i o n   p d f 
+  // C o n s t r u c t   c o n v o l u t i o n   p d f
   // -------------------------------------------------
-  
+
   // Construct landau (x) gauss
   RooFFTConvPdf lxg("lxg", "landau (X) gauss", Amp, landau, gauss) ;
   //Extended variable
   RooRealVar* Ns = new RooRealVar( "Ns", "N_{s}", 8000, "events");
   Ns->setConstant(kFALSE);
-  
+
   //------------------------------------
   //C r e a t e   E x t e n d e d  p.d.f
   //------------------------------------
   TString ex_pdf_name          = "lxg_ext";
   RooAddPdf* ex_lxg = new RooAddPdf( ex_pdf_name, "extLxG", RooArgList(lxg), RooArgList(*Ns) );
   //RooAddPdf* ex_lxg = new RooAddPdf( ex_pdf_name, "extLxG", RooArgList(landau), RooArgList(*Ns) );
-  
+
   fChain->SetBranchStatus("*", 0);
   fChain->SetBranchStatus("amp", 1);
   fChain->SetBranchStatus("x_dut[0]", 1);
@@ -889,7 +890,7 @@ std::pair<float,float> pulse::MPV_vs_Position_ROOFIT( int dut, TString coor, con
   if (fChain == 0) return std::pair<float,float>(-999,0);
   Long64_t nentries = fChain->GetEntriesFast();
   Long64_t nbytes = 0, nb = 0;
-  
+
   cout << "Running MPV_vs_Position Analysis\n";
   cout << "Total Events: " << nentries << "\n";
   TH1F* h_mpv = new TH1F("h_mpv", "h_mpv", 100, 0, 0.5);
@@ -899,7 +900,7 @@ std::pair<float,float> pulse::MPV_vs_Position_ROOFIT( int dut, TString coor, con
       if (ientry < 0) break;
       if (ientry % 10000 == 0) cout << "Processing Event " << ientry << "\n";
       nb = fChain->GetEntry(jentry);   nbytes += nb;
-      
+
       if ( amp[channel] >= AmpLowCut && amp[channel] <= AmpHighCut && amp[0] > photek_low && amp[0] < photek_high )
 	{
 	  if ( dut == 1 )
@@ -932,7 +933,7 @@ std::pair<float,float> pulse::MPV_vs_Position_ROOFIT( int dut, TString coor, con
 		  data.add(RooArgSet(Amp));
 		}
 	    }
-	  
+
 	}
     }
 
@@ -947,7 +948,7 @@ std::pair<float,float> pulse::MPV_vs_Position_ROOFIT( int dut, TString coor, con
      return std::pair<float,float>(0,999);
     }
   // ----------------------------------------------------------------------
-  // f i t   a n d   p l o t   c o n v o l u t e d   p d f 
+  // f i t   a n d   p l o t   c o n v o l u t e d   p d f
   // ----------------------------------------------------------------------
   std::cout << "======================" << std::endl;
   std::cout << "============" << data.numEntries() << "==========" << std::endl;
@@ -956,13 +957,13 @@ std::pair<float,float> pulse::MPV_vs_Position_ROOFIT( int dut, TString coor, con
   RooMsgService::instance().setGlobalKillBelow(RooFit::FATAL) ;
   // Fit gxlx to data
   ex_lxg->fitTo(data, RooFit::Strategy(0), RooFit::Extended( kTRUE ), RooFit::Range("fitRange") );
-  
+
   RooFitResult* sres = ex_lxg->fitTo(data, RooFit::Strategy(2), RooFit::Extended( kTRUE ), RooFit::Save( kTRUE ), RooFit::Range("fitRange") );
-  
+
   /*
   RooPlot* frame = amp.frame();
   data.plotOn( frame );
-  
+
   ex_lxg->plotOn( frame, RooFit::LineColor( kBlue ), RooFit::Range("Full"), RooFit::NormRange("Full") );
   ws->import( amp );
   ws->import( data );
@@ -984,7 +985,7 @@ std::pair<float,float> pulse::MPV_vs_Position_ROOFIT( int dut, TString coor, con
   ws->import( *sres );
   RooPlot* frame = Amp.frame();
   data.plotOn( frame );
-  
+
   ex_lxg->plotOn( frame, RooFit::LineColor( kBlue ), RooFit::Range("Full"), RooFit::NormRange("Full") );
   ws->import( Amp );
   ws->import( data );
@@ -993,7 +994,7 @@ std::pair<float,float> pulse::MPV_vs_Position_ROOFIT( int dut, TString coor, con
   ws->Write("myws");
   frame->Write();
   fout->Close();
-  
+
   /*
   //Fitting
   TF1* landau = new TF1( "landau", "landau", AmpLowCut, AmpHighCut );
@@ -1006,7 +1007,7 @@ std::pair<float,float> pulse::MPV_vs_Position_ROOFIT( int dut, TString coor, con
   std::string myCoor;
   if ( coor == "X" || coor == "x" ) myCoor = "X";
   if ( coor == "Y" || coor == "y" ) myCoor = "Y";
-  
+
   TString fname = Form("mpv_Channel%d_step%.2f_%s.root", channel,coorLow + step, myCoor.c_str());
   TFile* fout = new TFile(fname, "recreate");
   h_mpv->Write();
@@ -1034,7 +1035,7 @@ std::pair<float,float> pulse::DeltaT_vs_Position( int dut, TString coor, const i
       std::cerr << "[ERROR]: please provide a valid dut = <1,2>" << std::endl;
       return std::pair<float,float>(-999,0);
     }
-  
+
   fChain->SetBranchStatus("*", 0);
   fChain->SetBranchStatus("amp", 1);
   fChain->SetBranchStatus("gaus_mean", 1);
@@ -1050,7 +1051,7 @@ std::pair<float,float> pulse::DeltaT_vs_Position( int dut, TString coor, const i
   if (fChain == 0) return std::pair<float,float>(-999,0);
   Long64_t nentries = fChain->GetEntriesFast();
   Long64_t nbytes = 0, nb = 0;
-  
+
   cout << "Running Delta T_vs_Position Analysis\n";
   cout << "Total Events: " << nentries << "\n";
   TH1F* h_deltaT = new TH1F("h_delta_T", "h_delta_T", 1000, -10, 10);
@@ -1060,7 +1061,7 @@ std::pair<float,float> pulse::DeltaT_vs_Position( int dut, TString coor, const i
       if (ientry < 0) break;
       if (ientry % 10000 == 0) cout << "Processing Event " << ientry << "\n";
       nb = fChain->GetEntry(jentry);   nbytes += nb;
-      
+
       //timestamp uses algorithm selected by the timestampOption parameter
       double timestamp = gaus_mean[channel];
       if (timestampOption == 1) timestamp = LP2_30[channel];
@@ -1114,6 +1115,3 @@ std::pair<float,float> pulse::DeltaT_vs_Position( int dut, TString coor, const i
   fout->Close();
   return result;
 };
-
-
-
