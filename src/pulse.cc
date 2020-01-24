@@ -1599,9 +1599,9 @@ void pulse::PlotAll_CFD_DeltaTs_SIM(unsigned int channelNumber,double SignalAmpL
   const float amp_high_2d = 100;
 
   //2d Plots
-  const int n_tot_bins_2d = 100;
+  const int n_tot_bins_2d = 300;
   const float tot_low_2d  = 0;
-  const float tot_high_2d = 10;
+  const float tot_high_2d = 30;
 
   const int n_time_bins_2d = 750;
   const float time_low_2d  = 15;
@@ -1613,13 +1613,15 @@ void pulse::PlotAll_CFD_DeltaTs_SIM(unsigned int channelNumber,double SignalAmpL
   const float amp_low  = 0;
   const float amp_high = 100;
 
-  const int n_time_bins = 3000;
+  const int n_time_bins = 18000;//only for impulse response
+  //const int n_time_bins = 3000;//original for lgad pulse
   const float time_low  = -50;
   const float time_high = 50;
 
 
   fChain->SetBranchStatus("*", 0);
   fChain->SetBranchStatus("InterpolatedAmp", 1);
+  fChain->SetBranchStatus("baseline_RMS",1);
   //
   fChain->SetBranchStatus("t0_3",1);
   fChain->SetBranchStatus("t0_6",1);
@@ -1703,20 +1705,21 @@ void pulse::PlotAll_CFD_DeltaTs_SIM(unsigned int channelNumber,double SignalAmpL
   vector<TH1F*> DeltaTCFD_NoTWCorr;
   vector<TH1F*> DeltaTCFD_WithTWCorr;
 
-  TH1F* Amp = new TH1F("amp_ch0", "amp", n_amp_bins, amp_low, amp_high);
+  TH1F* Amp = new TH1F("amp_ch0", "amp", 25, 0, 200);
   TH1F* Risetime = new TH1F("Risetime_ch0", "risetime", 100, 0,5);
+  TH1F* noise_RMS = new TH1F("noise_rms", "noise rms", 40, 0,5);
 
   for(int i=0; i<ToTThresholds.size();i++) {
-    DeltaTToTVsLGADAmp.push_back( new TH2F( Form("DeltaTToTVsLGADAmp_",ToTThresholds[i].c_str())," ; LGAD Amplitude [mV]; #Delta t [ns]; Number of Events", n_amp_bins_2d, amp_low_2d, amp_high_2d, n_time_bins_2d, time_low_2d, time_high_2d));
-    DeltaTToTVsLGAD_TOT.push_back( new TH2F( Form("DeltaTToTVsLGAD_TOT_",ToTThresholds[i].c_str())," ; LGAD TOT [ns]; #Delta t [ns]; Number of Events", n_tot_bins_2d, tot_low_2d, tot_high_2d, n_time_bins_2d, time_low_2d, time_high_2d));
-    DeltaTToT_NoTWCorr.push_back( new TH1F( Form("DeltaTToT_NoTWCorr_",ToTThresholds[i].c_str()), "; #Delta t [ns]; Number of Events", n_time_bins, time_low, time_high));
-    DeltaTToT_WithTWCorr.push_back( new TH1F( Form("DeltaTToT_WithTWCorr_",ToTThresholds[i].c_str()), "; #Delta t [ns]; Number of Events", n_time_bins, time_low, time_high));
+    DeltaTToTVsLGADAmp.push_back( new TH2F( Form("DeltaTToTVsLGADAmp_%s",ToTThresholds[i].c_str())," ; LGAD Amplitude [mV]; #Delta t [ns]; Number of Events", n_amp_bins_2d, amp_low_2d, amp_high_2d, n_time_bins_2d, time_low_2d, time_high_2d));
+    DeltaTToTVsLGAD_TOT.push_back( new TH2F( Form("DeltaTToTVsLGAD_TOT_%s",ToTThresholds[i].c_str())," ; LGAD TOT [ns]; #Delta t [ns]; Number of Events", n_tot_bins_2d, tot_low_2d, tot_high_2d, n_time_bins_2d, time_low_2d, time_high_2d));
+    DeltaTToT_NoTWCorr.push_back( new TH1F( Form("DeltaTToT_NoTWCorr_%s",ToTThresholds[i].c_str()), "; #Delta t [ns]; Number of Events", n_time_bins, time_low, time_high));
+    DeltaTToT_WithTWCorr.push_back( new TH1F( Form("DeltaTToT_WithTWCorr_%s",ToTThresholds[i].c_str()), "; #Delta t [ns]; Number of Events", n_time_bins, time_low, time_high));
   }
 
   for(int i=0; i<CFDThresholds.size();i++) {
-    DeltaTCFDVsLGADAmp.push_back( new TH2F( Form("DeltaTCFDVsLGADAmp_",ToTThresholds[i].c_str())," ; LGAD Amplitude [mV]; #Delta t [ns]; Number of Events", n_amp_bins_2d, amp_low_2d, amp_high_2d, n_time_bins_2d, time_low_2d, time_high_2d));
-    DeltaTCFD_NoTWCorr.push_back( new TH1F( Form("DeltaTCFD_NoTWCorr_",ToTThresholds[i].c_str()), "; #Delta t [ns]; Number of Events", n_time_bins, time_low, time_high));
-    DeltaTCFD_WithTWCorr.push_back( new TH1F( Form("DeltaTCFD_WithTWCorr_",ToTThresholds[i].c_str()), "; #Delta t [ns]; Number of Events", n_time_bins, time_low, time_high));
+    DeltaTCFDVsLGADAmp.push_back( new TH2F( Form("DeltaTCFDVsLGADAmp_%s",CFDThresholds[i].c_str())," ; LGAD Amplitude [mV]; #Delta t [ns]; Number of Events", n_amp_bins_2d, amp_low_2d, amp_high_2d, n_time_bins_2d, time_low_2d, time_high_2d));
+    DeltaTCFD_NoTWCorr.push_back( new TH1F( Form("DeltaTCFD_NoTWCorr_%s",CFDThresholds[i].c_str()), "; #Delta t [ns]; Number of Events", n_time_bins, time_low, time_high));
+    DeltaTCFD_WithTWCorr.push_back( new TH1F( Form("DeltaTCFD_WithTWCorr_%s",CFDThresholds[i].c_str()), "; #Delta t [ns]; Number of Events", n_time_bins, time_low, time_high));
   }
 
   //**************************
@@ -1744,6 +1747,7 @@ void pulse::PlotAll_CFD_DeltaTs_SIM(unsigned int channelNumber,double SignalAmpL
     double amp = InterpolatedAmp[channelNumber];
     Amp->Fill(amp);
     Risetime->Fill(t0CFD_90[channelNumber]-t0CFD_10[channelNumber]);
+    noise_RMS->Fill(baseline_RMS[channelNumber]);
 
     for(int i=0; i<ToTThresholds.size();i++) {
       double tSig = 0;
@@ -1859,7 +1863,7 @@ void pulse::PlotAll_CFD_DeltaTs_SIM(unsigned int channelNumber,double SignalAmpL
     TimewalkSlopeToTErr[i] = DeltaTToTVsLGADAmp_ProfileFitFunction[i]->GetParError(1) * (1000 * 100);
     //ToT
     DeltaTToTVsLGAD_TOT_Profile.push_back(DeltaTToTVsLGAD_TOT[i]->ProfileX(Form("DeltaTToTVsLGAD_TOT_Profile_%s",ToTThresholds[i].c_str())));
-    DeltaTToTVsLGAD_TOT_ProfileFitFunction.push_back(new TF1(Form("DeltaTToTVsLGAD_TOT_ProfileFitFunction_%s",ToTThresholds[i].c_str()), "pol2", 1, 9));
+    DeltaTToTVsLGAD_TOT_ProfileFitFunction.push_back(new TF1(Form("DeltaTToTVsLGAD_TOT_ProfileFitFunction_%s",ToTThresholds[i].c_str()), "pol2", tot_low_2d, tot_high_2d));
     DeltaTToTVsLGAD_TOT_Profile[i]->Fit(Form("DeltaTToTVsLGAD_TOT_ProfileFitFunction_%s",ToTThresholds[i].c_str()),"WRQ");
     cout << ToTThresholds[i] << " : " << DeltaTToTVsLGAD_TOT_ProfileFitFunction[i]->GetParameter(1) << " +/- " << DeltaTToTVsLGAD_TOT_ProfileFitFunction[i]->GetParError(1) << "\n";
     //ToTValues[i] = atoi(ToTThresholds[i].c_str());
@@ -1917,11 +1921,11 @@ void pulse::PlotAll_CFD_DeltaTs_SIM(unsigned int channelNumber,double SignalAmpL
   //Reset the NoTWCorr histograms
   for(int i=0; i<ToTThresholds.size();i++) {
     delete DeltaTToT_NoTWCorr[i];
-    DeltaTToT_NoTWCorr[i] = new TH1F( Form("DeltaTToT_NoTWCorr_",ToTThresholds[i].c_str()), "; #Delta t [ns]; Number of Events", n_time_bins, time_low, time_high);
+    DeltaTToT_NoTWCorr[i] = new TH1F( Form("DeltaTToT_NoTWCorr_%s",ToTThresholds[i].c_str()), "; #Delta t [ns]; Number of Events", n_time_bins, time_low, time_high);
   }
   for(int i=0; i<CFDThresholds.size();i++) {
     delete DeltaTCFD_NoTWCorr[i];
-    DeltaTCFD_NoTWCorr[i] = new TH1F( Form("DeltaTCFD_NoTWCorr_",CFDThresholds[i].c_str()), "; #Delta t [ns]; Number of Events", n_time_bins, time_low, time_high);
+    DeltaTCFD_NoTWCorr[i] = new TH1F( Form("DeltaTCFD_NoTWCorr_%s",CFDThresholds[i].c_str()), "; #Delta t [ns]; Number of Events", n_time_bins, time_low, time_high);
   }
 
   //Second Event Loop to perform Timewalk correction
@@ -2032,46 +2036,10 @@ void pulse::PlotAll_CFD_DeltaTs_SIM(unsigned int channelNumber,double SignalAmpL
       DeltaTCFD_NoTWCorr[i]->Fill(tSig);
 
       //double TWCorrection =  DeltaTCFDVsLGADAmp_ProfileFitFunction[i]->GetParameter(0) + amp * DeltaTCFDVsLGADAmp_ProfileFitFunction[i]->GetParameter(1);
-      double TWCorrection = amp * DeltaTCFDVsLGADAmp_ProfileFitFunction[i]->GetParameter(1);
+      double TWCorrection = amp * DeltaTCFDVsLGADAmp_ProfileFitFunction[i]->GetParameter(1)+amp*amp*DeltaTCFDVsLGADAmp_ProfileFitFunction[i]->GetParameter(2);
       //DeltaTCFD_WithTWCorr[i]->Fill(tSig-tRef-TWCorrection);
       DeltaTCFD_WithTWCorr[i]->Fill(tSig-TWCorrection);
     }
-  }
-
-  //********************************************************
-  //Make Time Resolution Graphs
-  //********************************************************
-  for(int i=0; i<ToTThresholds.size();i++) {
-    TF1 *tmpFunction = new TF1("tmpGaus_ntw", "gaus",-100,100);
-    tmpFunction->SetParameter(1,20);
-    DeltaTToT_NoTWCorr[i]->Fit("tmpGaus_ntw", "RQ");
-    cout << ToTThresholds[i] << " : " << tmpFunction->GetParameter(2) << " +/- " << tmpFunction->GetParError(2) << "\n";
-    DeltaTSigmaToT_NoTWCorr[i] = tmpFunction->GetParameter(2) * 1000;
-    DeltaTSigmaErrToT_NoTWCorr[i] = tmpFunction->GetParError(2) * 1000;
-    delete tmpFunction;
-
-    tmpFunction = new TF1("tmpGaus_tw", "gaus",-100,100);
-    tmpFunction->SetParameter(1,20);
-    DeltaTToT_WithTWCorr[i]->Fit("tmpGaus_tw", "RQ");
-    cout << ToTThresholds[i] << " : " << tmpFunction->GetParameter(2) << " +/- " << tmpFunction->GetParError(2) << "\n";
-    DeltaTSigmaToT_WithTWCorr[i] = tmpFunction->GetParameter(2) * 1000;
-    DeltaTSigmaErrToT_WithTWCorr[i] = tmpFunction->GetParError(2) * 1000;
-    delete tmpFunction;
-  }
- for(int i=0; i<CFDThresholds.size();i++) {
-    TF1 *tmpFunction = new TF1("tmpGaus", "gaus",-100,100);
-    DeltaTCFD_NoTWCorr[i]->Fit("tmpGaus", "RQ");
-    cout << CFDThresholds[i] << " : " << tmpFunction->GetParameter(2) << " +/- " << tmpFunction->GetParError(2) << "\n";
-    DeltaTSigmaCFD_NoTWCorr[i] = tmpFunction->GetParameter(2) * 1000;
-    DeltaTSigmaErrCFD_NoTWCorr[i] = tmpFunction->GetParError(2) * 1000;
-    delete tmpFunction;
-
-    tmpFunction = new TF1("tmpGaus", "gaus",-100,100);
-    DeltaTCFD_WithTWCorr[i]->Fit("tmpGaus", "RQ");
-    cout << CFDThresholds[i] << " : " << tmpFunction->GetParameter(2) << " +/- " << tmpFunction->GetParError(2) << "\n";
-    DeltaTSigmaCFD_WithTWCorr[i] = tmpFunction->GetParameter(2) * 1000;
-    DeltaTSigmaErrCFD_WithTWCorr[i] = tmpFunction->GetParError(2) * 1000;
-    delete tmpFunction;
   }
 
   //Make Graphs of the time resolution vs threshold
@@ -2087,6 +2055,78 @@ void pulse::PlotAll_CFD_DeltaTs_SIM(unsigned int channelNumber,double SignalAmpL
  TGraphErrors *TimeResolutionVsThresholdCFD_WithTWCorr = new TGraphErrors(CFDThresholds.size(), CFDValues, DeltaTSigmaCFD_WithTWCorr, CFDValuesErr, DeltaTSigmaErrCFD_WithTWCorr);
  TimeResolutionVsThresholdCFD_WithTWCorr->GetYaxis()->SetTitle(" Time Resolution [ ps ] ");
  TimeResolutionVsThresholdCFD_WithTWCorr->GetXaxis()->SetTitle(" CFD Threshold [ % ] ");
+
+  //********************************************************
+  //Make Time Resolution Graphs
+  //********************************************************
+  for(int i=0; i<ToTThresholds.size();i++) {
+    TF1 *tmpFunction = new TF1("tmpGaus_ntw", "gaus",
+    DeltaTToT_NoTWCorr[i]->GetMean()-2.*DeltaTToT_NoTWCorr[i]->GetRMS(),DeltaTToT_NoTWCorr[i]->GetMean()+2.*DeltaTToT_NoTWCorr[i]->GetRMS());
+    tmpFunction->SetParameter(1,DeltaTToT_NoTWCorr[i]->GetMean());
+    tmpFunction->SetParameter(2,DeltaTToT_NoTWCorr[i]->GetRMS());
+    DeltaTToT_NoTWCorr[i]->Fit("tmpGaus_ntw", "LRQ");
+    cout << ToTThresholds[i] << " no correction: " << tmpFunction->GetParameter(2) << " +/- " << tmpFunction->GetParError(2) << "\n";
+    DeltaTSigmaToT_NoTWCorr[i] = tmpFunction->GetParameter(2) * 1000;
+    TimeResolutionVsThresholdToT_NoTWCorr->SetPoint(i, ToTValues[i], DeltaTSigmaToT_NoTWCorr[i]);
+    DeltaTSigmaErrToT_NoTWCorr[i] = tmpFunction->GetParError(2) * 1000;
+    TimeResolutionVsThresholdToT_NoTWCorr->SetPointError(i, 0, DeltaTSigmaErrToT_NoTWCorr[i]);
+    delete tmpFunction;
+
+    tmpFunction = new TF1("tmpGaus_tw", "gaus",
+    DeltaTToT_WithTWCorr[i]->GetMean()-2.0*DeltaTToT_WithTWCorr[i]->GetRMS(),DeltaTToT_WithTWCorr[i]->GetMean()+2.0*DeltaTToT_WithTWCorr[i]->GetRMS());
+    tmpFunction->SetParameter(1,DeltaTToT_WithTWCorr[i]->GetMean());
+    tmpFunction->SetParameter(2,DeltaTToT_WithTWCorr[i]->GetRMS());
+    DeltaTToT_WithTWCorr[i]->Fit("tmpGaus_tw", "LRQ");
+    cout << ToTThresholds[i] << " corrected: " << tmpFunction->GetParameter(2) << " +/- " << tmpFunction->GetParError(2) << "\n";
+    DeltaTSigmaToT_WithTWCorr[i] = tmpFunction->GetParameter(2) * 1000;
+    TimeResolutionVsThresholdToT_WithTWCorr->SetPoint(i, ToTValues[i], DeltaTSigmaToT_WithTWCorr[i]);
+    DeltaTSigmaErrToT_WithTWCorr[i] = tmpFunction->GetParError(2) * 1000;
+    TimeResolutionVsThresholdToT_WithTWCorr->SetPointError(i, 0, DeltaTSigmaErrToT_WithTWCorr[i]);
+    delete tmpFunction;
+  }
+ for(int i = 0; i < CFDThresholds.size(); i++) {
+    TF1 *tmpFunction = new TF1("tmpGaus", "gaus",
+    DeltaTCFD_NoTWCorr[i]->GetMean()-2.0*DeltaTCFD_NoTWCorr[i]->GetRMS(),DeltaTCFD_NoTWCorr[i]->GetMean()+2.0*DeltaTCFD_NoTWCorr[i]->GetRMS());
+    tmpFunction->SetParameter(1,DeltaTCFD_NoTWCorr[i]->GetMean());
+    tmpFunction->SetParameter(2,DeltaTCFD_NoTWCorr[i]->GetRMS());
+    DeltaTCFD_NoTWCorr[i]->Fit("tmpGaus", "LRQ");
+    cout << CFDThresholds[i] << " CFD no-correction: " << tmpFunction->GetParameter(2) << " +/- " << tmpFunction->GetParError(2) << "\n";
+    DeltaTSigmaCFD_NoTWCorr[i] = tmpFunction->GetParameter(2) * 1000;
+    TimeResolutionVsThresholdCFD_NoTWCorr->SetPoint(i, CFDValues[i], DeltaTSigmaCFD_NoTWCorr[i]);
+    DeltaTSigmaErrCFD_NoTWCorr[i] = tmpFunction->GetParError(2) * 1000;
+    TimeResolutionVsThresholdCFD_NoTWCorr->SetPointError(i, 0, DeltaTSigmaErrCFD_NoTWCorr[i]);
+    delete tmpFunction;
+
+    tmpFunction = new TF1("tmpGaus_cfd", "gaus",
+    DeltaTCFD_WithTWCorr[i]->GetMean()-2.0*DeltaTCFD_WithTWCorr[i]->GetRMS(),DeltaTCFD_WithTWCorr[i]->GetMean()+2.0*DeltaTCFD_WithTWCorr[i]->GetRMS());
+    tmpFunction->SetParameter(1,DeltaTCFD_WithTWCorr[i]->GetMean());
+    tmpFunction->SetParameter(2,DeltaTCFD_WithTWCorr[i]->GetRMS());
+    DeltaTCFD_WithTWCorr[i]->Fit("tmpGaus_cfd", "LRQ");
+    cout << CFDThresholds[i] << " CFD correction: " << tmpFunction->GetParameter(2) << " +/- " << tmpFunction->GetParError(2) << "\n";
+    DeltaTSigmaCFD_WithTWCorr[i] = tmpFunction->GetParameter(2) * 1000;
+    std::cout << "check: " << i << " " << DeltaTSigmaCFD_WithTWCorr[i] << std::endl;
+    TimeResolutionVsThresholdCFD_WithTWCorr->SetPoint(i, CFDValues[i], DeltaTSigmaCFD_WithTWCorr[i]);
+    DeltaTSigmaErrCFD_WithTWCorr[i] = tmpFunction->GetParError(2) * 1000;
+    TimeResolutionVsThresholdCFD_WithTWCorr->SetPointError(i, 0, DeltaTSigmaErrCFD_WithTWCorr[i]);
+    delete tmpFunction;
+  }
+
+  //Make Graphs of the time resolution vs threshold
+ //TGraphErrors *TimeResolutionVsThresholdToT_NoTWCorr = new TGraphErrors(ToTThresholds.size(), ToTValues, DeltaTSigmaToT_NoTWCorr, ToTValuesErr, DeltaTSigmaErrToT_NoTWCorr);
+ //TimeResolutionVsThresholdToT_NoTWCorr->GetYaxis()->SetTitle(" Time Resolution [ ps ] ");
+ //TimeResolutionVsThresholdToT_NoTWCorr->GetXaxis()->SetTitle(" LE Threshold [ mV ] ");
+ //TGraphErrors *TimeResolutionVsThresholdToT_WithTWCorr = new TGraphErrors(ToTThresholds.size(), ToTValues, DeltaTSigmaToT_WithTWCorr, ToTValuesErr, DeltaTSigmaErrToT_WithTWCorr);
+ //TimeResolutionVsThresholdToT_WithTWCorr->GetYaxis()->SetTitle(" Time Resolution [ ps ] ");
+ //TimeResolutionVsThresholdToT_WithTWCorr->GetXaxis()->SetTitle(" LE Threshold [ mV ] ");
+ //TGraphErrors *TimeResolutionVsThresholdCFD_NoTWCorr = new TGraphErrors(CFDThresholds.size(), CFDValues, DeltaTSigmaCFD_NoTWCorr, CFDValuesErr, DeltaTSigmaErrCFD_NoTWCorr);
+ //TimeResolutionVsThresholdCFD_NoTWCorr->GetYaxis()->SetTitle(" Time Resolution [ ps ] ");
+ //TimeResolutionVsThresholdCFD_NoTWCorr->GetXaxis()->SetTitle(" CFD Threshold [%] ");
+ //TGraphErrors *TimeResolutionVsThresholdCFD_WithTWCorr = new TGraphErrors(CFDThresholds.size(), CFDValues, DeltaTSigmaCFD_WithTWCorr, CFDValuesErr, DeltaTSigmaErrCFD_WithTWCorr);
+ for( int i = 0; i < CFDThresholds.size(); i++ )
+ {
+   //DeltaTSigmaCFD_WithTWCorr[i] = 100.;
+   //TimeResolutionVsThresholdCFD_WithTWCorr->SetPoint(i, CFDValues[i], DeltaTSigmaCFD_WithTWCorr[i]);
+ }
 
 
  //********************************************************
@@ -2104,7 +2144,7 @@ void pulse::PlotAll_CFD_DeltaTs_SIM(unsigned int channelNumber,double SignalAmpL
  cv->SetBorderMode(0);
  cv->SetBorderSize(2);
  cv->SetFrameBorderMode(0);
- TimeResolutionVsThresholdToT_NoTWCorr->SetTitle("Time Resolution Vs ToT Threshold");
+ TimeResolutionVsThresholdToT_NoTWCorr->SetTitle("Time Resolution Vs LE Threshold");
  TimeResolutionVsThresholdToT_NoTWCorr->Draw("AP");
  TimeResolutionVsThresholdToT_WithTWCorr->Draw("Psame");
  TimeResolutionVsThresholdToT_NoTWCorr->GetXaxis()->SetRangeUser(0,50);
@@ -2112,10 +2152,10 @@ void pulse::PlotAll_CFD_DeltaTs_SIM(unsigned int channelNumber,double SignalAmpL
  TimeResolutionVsThresholdToT_NoTWCorr->GetYaxis()->SetTitleOffset(1.3);
  TimeResolutionVsThresholdToT_NoTWCorr->SetMarkerColor(kBlue);
  TimeResolutionVsThresholdToT_NoTWCorr->SetMarkerStyle(20);
- TimeResolutionVsThresholdToT_NoTWCorr->SetMarkerSize(1);
+ TimeResolutionVsThresholdToT_NoTWCorr->SetMarkerSize(1.5);
  TimeResolutionVsThresholdToT_WithTWCorr->SetMarkerColor(kRed);
  TimeResolutionVsThresholdToT_WithTWCorr->SetMarkerStyle(20);
- TimeResolutionVsThresholdToT_WithTWCorr->SetMarkerSize(1);
+ TimeResolutionVsThresholdToT_WithTWCorr->SetMarkerSize(1.5);
  TimeResolutionVsThresholdToT_NoTWCorr->SetLineWidth(2);
  TimeResolutionVsThresholdToT_WithTWCorr->SetLineWidth(2);
  TimeResolutionVsThresholdToT_NoTWCorr->SetLineColor(kBlue);
@@ -2145,20 +2185,20 @@ void pulse::PlotAll_CFD_DeltaTs_SIM(unsigned int channelNumber,double SignalAmpL
  TimeResolutionVsThresholdCFD_NoTWCorr->SetTitle("Time Resolution Vs CFD Threshold");
  TimeResolutionVsThresholdCFD_NoTWCorr->Draw("AP");
  TimeResolutionVsThresholdCFD_WithTWCorr->Draw("Psame");
- TimeResolutionVsThresholdCFD_NoTWCorr->GetXaxis()->SetRangeUser(7,90);
+ TimeResolutionVsThresholdCFD_NoTWCorr->GetXaxis()->SetRangeUser(3,85);
  TimeResolutionVsThresholdCFD_NoTWCorr->GetYaxis()->SetRangeUser(0,200);
  TimeResolutionVsThresholdCFD_NoTWCorr->GetYaxis()->SetTitleOffset(1.3);
  TimeResolutionVsThresholdCFD_NoTWCorr->SetMarkerColor(kBlue);
  TimeResolutionVsThresholdCFD_NoTWCorr->SetMarkerStyle(20);
- TimeResolutionVsThresholdCFD_NoTWCorr->SetMarkerSize(1);
+ TimeResolutionVsThresholdCFD_NoTWCorr->SetMarkerSize(2);
  TimeResolutionVsThresholdCFD_WithTWCorr->SetMarkerColor(kRed);
  TimeResolutionVsThresholdCFD_WithTWCorr->SetMarkerStyle(20);
- TimeResolutionVsThresholdCFD_WithTWCorr->SetMarkerSize(1);
+ TimeResolutionVsThresholdCFD_WithTWCorr->SetMarkerSize(1.5);
  TimeResolutionVsThresholdCFD_NoTWCorr->SetLineWidth(2);
  TimeResolutionVsThresholdCFD_WithTWCorr->SetLineWidth(2);
  TimeResolutionVsThresholdCFD_NoTWCorr->SetLineColor(kBlue);
  TimeResolutionVsThresholdCFD_WithTWCorr->SetLineColor(kRed);
- TLine* line2 = new TLine(8,30,90,30);
+ TLine* line2 = new TLine(3,30,85,30);
  line2->SetLineStyle(2);
  line2->SetLineWidth(3);
  line2->SetLineColor(kGreen-2);
@@ -2180,6 +2220,152 @@ void pulse::PlotAll_CFD_DeltaTs_SIM(unsigned int channelNumber,double SignalAmpL
 
 
 
+ delete cv;
+ cv = new TCanvas("cv","cv", 800,800);
+
+ TF1* f1_landau = new TF1("f1_landau", "landau",0,200);
+ //tmpFunction->SetParameter(1,20);
+ Amp->Fit("f1_landau", "LWR");
+ //cout << "Landau : " << f1_landau->GetParameter(1) << " +/- " << f1_landau->GetParError(1) << "\n";
+
+ Amp->SetStats(0);
+ Amp->SetTitle("Max Amplitude");
+ Amp->SetXTitle("Amplitude [mV]");
+ Amp->Draw("HISTO");
+ f1_landau->Draw("same");
+ TLatex *   tex = new TLatex(0.81,0.58,Form("MPV = %0.1f +/- %0.1f [mV]",f1_landau->GetParameter(1), f1_landau->GetParError(1)));
+ tex->SetNDC();
+ tex->SetTextAlign(31);
+ tex->SetTextFont(41);
+ tex->SetTextSize(0.04);
+ tex->SetLineWidth(2);
+ tex->Draw();
+ Amp->GetXaxis()->SetRangeUser(0,200);
+ Amp->GetYaxis()->SetRangeUser(0,350);
+ Amp->GetYaxis()->SetTitleOffset(1.3);
+ Amp->SetMarkerColor(kBlue);
+ Amp->SetMarkerStyle(20);
+ Amp->SetMarkerSize(2);
+ Amp->SetLineWidth(2);
+ Amp->SetLineColor(kBlue);
+ //TLine* line2 = new TLine(8,30,90,30);
+ //line2->SetLineStyle(2);
+ //line2->SetLineWidth(3);
+ //line2->SetLineColor(kGreen-2);
+ //line2->Draw();
+ leg = new TLegend(0.5,0.8,0.8,0.9,NULL,"brNDC" );
+ leg->SetTextSize(0.03);
+ leg->SetBorderSize(0);
+ leg->SetLineColor(1);
+ leg->SetLineStyle(1);
+ leg->SetLineWidth(1);
+ leg->SetFillColor(0);
+ leg->SetFillStyle(0);
+ leg->AddEntry(Amp,"LGAD Max Amplitude","l");
+ //leg->AddEntry(TimeResolutionVsThresholdCFD_WithTWCorr,"With Timewalk Correction","L");
+ leg->Draw();
+ cv->SaveAs(Form("%s_Amp.gif",prefix.c_str()));
+ cv->SaveAs(Form("%s_Amp.pdf", prefix.c_str()));
+ cv->SaveAs(Form("%s_Amp.C", prefix.c_str()));
+
+
+ delete cv;
+ cv = new TCanvas("cv","cv", 800,800);
+
+ TF1* f1_gauss = new TF1("f1_gauss", "gaus",0,5);
+ f1_gauss->SetParameter(1, Risetime->GetMean());
+ Risetime->Fit("f1_gauss", "LWR");
+ //cout << "Landau : " << f1_landau->GetParameter(1) << " +/- " << f1_landau->GetParError(1) << "\n";
+
+ Risetime->SetStats(0);
+ Risetime->SetTitle("Risetime");
+ Risetime->SetXTitle("Risetime [ns]");
+ Risetime->Draw("HISTO");
+ f1_gauss->Draw("same");
+ delete tex;
+ tex = new TLatex(0.81,0.58,Form("Risetime = %0.1f +/- %0.1f [ps]",f1_gauss->GetParameter(1)*1000., f1_gauss->GetParameter(2)*1000.));
+ tex->SetNDC();
+ tex->SetTextAlign(31);
+ tex->SetTextFont(41);
+ tex->SetTextSize(0.04);
+ tex->SetLineWidth(2);
+ tex->Draw();
+ Risetime->GetXaxis()->SetRangeUser(0,200);
+ Risetime->GetYaxis()->SetRangeUser(0,350);
+ Risetime->GetYaxis()->SetTitleOffset(1.3);
+ Risetime->SetMarkerColor(kBlue);
+ Risetime->SetMarkerStyle(20);
+ Risetime->SetMarkerSize(2);
+ Risetime->SetLineWidth(2);
+ Risetime->SetLineColor(kBlue);
+ //TLine* line2 = new TLine(8,30,90,30);
+ //line2->SetLineStyle(2);
+ //line2->SetLineWidth(3);
+ //line2->SetLineColor(kGreen-2);
+ //line2->Draw();
+ leg = new TLegend(0.5,0.8,0.8,0.9,NULL,"brNDC" );
+ leg->SetTextSize(0.03);
+ leg->SetBorderSize(0);
+ leg->SetLineColor(1);
+ leg->SetLineStyle(1);
+ leg->SetLineWidth(1);
+ leg->SetFillColor(0);
+ leg->SetFillStyle(0);
+ leg->AddEntry(Risetime,"Risetime","l");
+ //leg->AddEntry(TimeResolutionVsThresholdCFD_WithTWCorr,"With Timewalk Correction","L");
+ leg->Draw();
+ cv->SaveAs(Form("%s_Risetime.gif",prefix.c_str()));
+ cv->SaveAs(Form("%s_Risetime.pdf", prefix.c_str()));
+ cv->SaveAs(Form("%s_Risetime.C", prefix.c_str()));
+
+ delete cv;
+ cv = new TCanvas("cv","cv", 800,800);
+
+ TF1* f1_gauss_2 = new TF1("f1_gauss_2", "gaus",0,5);
+ f1_gauss_2->SetParameter(1, noise_RMS->GetMean());
+ noise_RMS->Fit("f1_gauss_2", "LWR");
+ //cout << "Landau : " << f1_landau->GetParameter(1) << " +/- " << f1_landau->GetParError(1) << "\n";
+
+ noise_RMS->SetStats(0);
+ noise_RMS->SetTitle("noise rms");
+ noise_RMS->SetXTitle("noise rms [mV]");
+ noise_RMS->Draw("HISTO");
+ f1_gauss_2->Draw("same");
+ delete tex;
+ tex = new TLatex(0.81,0.58,Form("noise rms = %0.1f +/- %0.1f [mV]",f1_gauss_2->GetParameter(1), f1_gauss_2->GetParameter(2)));
+ tex->SetNDC();
+ tex->SetTextAlign(31);
+ tex->SetTextFont(41);
+ tex->SetTextSize(0.04);
+ tex->SetLineWidth(2);
+ tex->Draw();
+ noise_RMS->GetXaxis()->SetRangeUser(0,200);
+ noise_RMS->GetYaxis()->SetRangeUser(0,500);
+ noise_RMS->GetYaxis()->SetTitleOffset(1.3);
+ noise_RMS->SetMarkerColor(kBlue);
+ noise_RMS->SetMarkerStyle(20);
+ noise_RMS->SetMarkerSize(2);
+ noise_RMS->SetLineWidth(2);
+ noise_RMS->SetLineColor(kBlue);
+ //TLine* line2 = new TLine(8,30,90,30);
+ //line2->SetLineStyle(2);
+ //line2->SetLineWidth(3);
+ //line2->SetLineColor(kGreen-2);
+ //line2->Draw();
+ leg = new TLegend(0.5,0.8,0.8,0.9,NULL,"brNDC" );
+ leg->SetTextSize(0.03);
+ leg->SetBorderSize(0);
+ leg->SetLineColor(1);
+ leg->SetLineStyle(1);
+ leg->SetLineWidth(1);
+ leg->SetFillColor(0);
+ leg->SetFillStyle(0);
+ leg->AddEntry(noise_RMS,"noise_RMS","l");
+ //leg->AddEntry(TimeResolutionVsThresholdCFD_WithTWCorr,"With Timewalk Correction","L");
+ leg->Draw();
+ cv->SaveAs(Form("%s_noise_RMS.gif",prefix.c_str()));
+ cv->SaveAs(Form("%s_noise_RMS.pdf", prefix.c_str()));
+ cv->SaveAs(Form("%s_noise_RMS.C", prefix.c_str()));
   //********************************************************
   //Activate all branches back to normal
   //********************************************************

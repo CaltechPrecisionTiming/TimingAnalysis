@@ -86,8 +86,8 @@ int main( int argc, char** argv)
   //------------------------
   //Run 1251 CH3(Photek), CH2(W6 pre-rad)
   //------------------------
-  int name_low = inputRootFile.find("ShapingTime");
-  int name_high = inputRootFile.find("_ALL_converted.root");
+  int name_low = inputRootFile.find("impulse_response");
+  int name_high = inputRootFile.find("_converted.root");
   //std::cout << "NEW NAME: " << inputRootFile.substr(name_low,name_high-name_low) << std::endl;
   std::string prefix = inputRootFile.substr(name_low,name_high-name_low);
   myPulse->PlotAll_CFD_DeltaTs_SIM(0,15,80,prefix);
